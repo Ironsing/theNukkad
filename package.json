@@ -10,12 +10,13 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.5.3",
+    "@capacitor/cli": "^8.4.3",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
-    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/typography": "^0.5.4",
     "@tailwindcss/vite": "^4.3.3",
     "@tsconfig/svelte": "^5.0.8",
     "@types/node": "^24.13.3",
+    "supabase": "^2.120.0",
     "svelte": "^5.57.0",
     "svelte-check": "^4.7.6",
     "tailwindcss": "^4.3.3",
@@ -24,6 +25,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
-    "@capacitor/core": "^8.5.3"
+    "@capacitor/core": "^8.5.3",
+    "@supabase/supabase-js": "^2.117.3"
   }
 }
