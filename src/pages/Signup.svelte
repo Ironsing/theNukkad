@@ -8,7 +8,10 @@
     let error = $state("");
     let sent = $state(false);
 
-    async function handleSubmit() {
+    async function handleSubmit(event: SubmitEvent) {
+        // Without this the browser performs its own GET submission, reloading the
+        // page (and cancelling the in-flight sign-up request) before it resolves.
+        event.preventDefault();
         error = "";
         if (password !== confirm) {
             error = "Passwords do not match";

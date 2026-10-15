@@ -1,7 +1,11 @@
 import { push, replace, router } from 'svelte-spa-router';
 import { supabase } from './supabase';
 
-const PROTECTED_ROUTES = ['/welcome'];
+const PROTECTED_ROUTES = ['/welcome', '/reset-password'];
+
+export function isAuthCallbackPending() {
+    return new URLSearchParams(window.location.search).has('code');
+}
 
 export async function startSignup(
     email: string,
@@ -47,7 +51,19 @@ export async function signOut() {
 
 export async function passwordReset(email: string) {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/welcome`,
+        redirectTo: `${window.location.origin}/`,
+    });
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+export async function updatePassword(newPassword: string) {
+    const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
     });
 
     if (error) {
@@ -77,6 +93,26 @@ supabase.auth.onAuthStateChange((event, session) => {
         return;
     }
 
+    // A password reset link produces a recovery session, and emits
+    // PASSWORD_RECOVERY rather than SIGNED_IN. The user is not "logged in" yet -
+    // they still have to choose a new password - so this must not fall through
+    // to /welcome
+    if (event === "PASSWORD_RECOVERY" && session) {
+        if (router.location !== "/reset-password") {
+            push("/reset-password");
+        }
+        return;
+    }
+
+    // The password has been changed. Until then, stay put on /reset-password:
+    // INITIAL_SESSION arrives on every page load (including right after the
+    // recovery exchange), and bouncing to /welcome on it would pull the user
+    // off the form before they could choose a password.
+    if (event === "USER_UPDATED" && session && router.location === "/reset-password") {
+        push("/welcome");
+        return;
+    }
+
     // This also covers
     // INITIAL_SESSION (a load or refresh with no stored session) and
     // sessions that couldn't be refreshed
@@ -84,4 +120,5 @@ supabase.auth.onAuthStateChange((event, session) => {
         replace("/login");
     }
 });
+
 

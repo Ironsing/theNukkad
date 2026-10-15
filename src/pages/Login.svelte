@@ -1,17 +1,34 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
-    import { signIn } from "../lib/auth";
+    import { signIn, passwordReset } from "../lib/auth";
 
     let email = $state("");
     let password = $state("");
     let error = $state("");
+    let resetSent = $state("");
+    let resetError = $state("");
 
-    async function handleSubmit() {
+    async function handleSubmit(event: SubmitEvent) {
+        // Without this the browser performs its own GET submission, reloading the
+        // page (and cancelling the in-flight sign-in request) before it resolves.
+        event.preventDefault();
         error = "";
         try {
             await signIn(email, password);
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);
+        }
+    }
+
+    async function handleForgotPassword() {
+        resetError = "";
+        resetSent = "";
+
+        try {
+            await passwordReset(email);
+            resetSent = email;
+        } catch (e) {
+            resetError = e instanceof Error ? e.message : String(e);
         }
     }
 </script>
@@ -86,6 +103,26 @@
             >
                 Log in
             </button>
+
+            {#if resetSent}
+                <p class="text-sm text-muted" role="status">
+                    If an account exists for {resetSent}, we've sent a password
+                    reset link to it.
+                </p>
+            {:else}
+                <button
+                    type="button"
+                    onclick={handleForgotPassword}
+                    disabled={!email}
+                    class="w-full text-center text-sm font-medium text-acc-green underline decoration-acc-green/40 underline-offset-4 transition hover:decoration-acc-green disabled:text-primary/30 disabled:no-underline"
+                >
+                    Forgot your password?
+                </button>
+            {/if}
+
+            {#if resetError}
+                <p class="text-sm text-red-500">{resetError}</p>
+            {/if}
         </form>
 
         <!-- Signup link -->
