@@ -20,7 +20,7 @@
 
         try {
             await updatePassword(password);
-            // The auth listener sees USER_UPDATED and routes to /welcome.
+            // The auth listener sees USER_UPDATED and routes to /home.
             done = true;
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);

@@ -1,7 +1,30 @@
 import { push, replace, router } from 'svelte-spa-router';
 import { supabase } from './supabase';
 
-const PROTECTED_ROUTES = ['/welcome', '/reset-password'];
+export type Role = 'student' | 'restaurant';
+
+// Every route that needs a session, mapped to where a logged-out user is sent
+// instead. Rest is public.
+const PRIVATE_ROUTES = {
+    '/home': '/onboard',
+    '/reset-password': '/studentlogin',
+};
+
+function privateFallback(path: string) {
+    return (PRIVATE_ROUTES as Record<string, string>)[path];
+}
+
+// Guard condition for a private route: go to that route's fallback when there's no session.
+export function requireSession(path: keyof typeof PRIVATE_ROUTES) {
+    return async () => {
+        if (await isAuthenticated()) {
+            return true;
+        }
+
+        replace(PRIVATE_ROUTES[path]);
+        return false;
+    };
+}
 
 export function isAuthCallbackPending() {
     return new URLSearchParams(window.location.search).has('code');
@@ -39,6 +62,57 @@ export async function signIn(
         throw error;
     }
     return data;
+}
+
+// The account type of the logged-in user. Read from our own table rather than
+// trusted from anywhere client-side: RLS only lets a user select their own row.
+export async function currentRole(): Promise<Role> {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data.role as Role;
+}
+
+// Set while a role-gated sign-in is in flight. SIGNED_IN fires as soon as the
+// password is accepted, but the account type is only knowable after that (the
+// profile row needs the session to be readable), and a mismatch signs the user
+// straight back out - so the listener below must not bounce them to /home in
+// the meantime.
+let roleCheckInFlight = false;
+
+export async function signInWithRole(
+    email: string,
+    password: string,
+    role: Role,
+) {
+    roleCheckInFlight = true;
+
+    try {
+        await signIn(email, password);
+
+        const actual = await currentRole();
+
+        if (actual !== role) {
+            await signOut();
+
+            throw new Error(
+                role === 'restaurant'
+                    ? 'That account is not a restaurant account.'
+                    : 'That account is not a student account.',
+            );
+        }
+
+        // The listener deliberately sat this one out, so navigating is up to us.
+        push('/home');
+    } finally {
+        roleCheckInFlight = false;
+    }
 }
 
 export async function signOut() {
@@ -87,8 +161,14 @@ export async function isAuthenticated() {
 // The single place that moves the user between public and protected pages
 supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_IN" && session) {
-        if (router.location !== "/welcome") {
-            push("/welcome");
+        // A role-gated sign-in owns this transition: the account type is checked
+        // first, and a wrong-role account is signed back out. See signInWithRole.
+        if (roleCheckInFlight) {
+            return;
+        }
+
+        if (router.location !== "/home") {
+            push("/home");
         }
         return;
     }
@@ -96,7 +176,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     // A password reset link produces a recovery session, and emits
     // PASSWORD_RECOVERY rather than SIGNED_IN. The user is not "logged in" yet -
     // they still have to choose a new password - so this must not fall through
-    // to /welcome
+    // to /home
     if (event === "PASSWORD_RECOVERY" && session) {
         if (router.location !== "/reset-password") {
             push("/reset-password");
@@ -106,18 +186,20 @@ supabase.auth.onAuthStateChange((event, session) => {
 
     // The password has been changed. Until then, stay put on /reset-password:
     // INITIAL_SESSION arrives on every page load (including right after the
-    // recovery exchange), and bouncing to /welcome on it would pull the user
+    // recovery exchange), and bouncing to /home on it would pull the user
     // off the form before they could choose a password.
     if (event === "USER_UPDATED" && session && router.location === "/reset-password") {
-        push("/welcome");
+        push("/home");
         return;
     }
 
     // This also covers
     // INITIAL_SESSION (a load or refresh with no stored session) and
     // sessions that couldn't be refreshed
-    if (!session && PROTECTED_ROUTES.includes(router.location)) {
-        replace("/login");
+    const fallback = privateFallback(router.location);
+
+    if (!session && fallback) {
+        replace(fallback);
     }
 });
 

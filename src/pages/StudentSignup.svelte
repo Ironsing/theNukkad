@@ -141,7 +141,7 @@
         <p class="text-sm text-muted">
             Already have an account?
             <a
-                href="/login"
+                href="/studentlogin"
                 use:link
                 class="ml-1 font-medium text-acc-green underline decoration-acc-green/40 underline-offset-4 transition hover:decoration-acc-green"
             >
