@@ -48,7 +48,7 @@ One Auth instance serves both apps, so:
   emails also carry a 6-digit code. Each app chooses in its `main.ts`, through
   `configureAuth({ emailDelivery })`.
 - Each app declares its own signed-out redirects in `main.ts`: `/home` goes to
-  `/onboard` in the student app and to `/restologin` in the restaurant app.
+  `/onboard` in the student app and to `/login` in the restaurant app.
 - The role check at sign-in is convenience; the real boundary is row level
   security in `supabase/migrations`.
 - Restaurant accounts are provisioned by hand for now. There is no self-serve

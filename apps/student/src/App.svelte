@@ -2,8 +2,8 @@
     import Router from "svelte-spa-router";
     import { replace } from "svelte-spa-router";
     import { wrap } from "svelte-spa-router/wrap";
-    import StudentLogin from "./pages/StudentLogin.svelte";
-    import StudentSignup from "./pages/StudentSignup.svelte";
+    import Login from "./pages/Login.svelte";
+    import Signup from "./pages/Signup.svelte";
     import Home from "./pages/Home.svelte";
     import Onboarding from "./pages/Onboarding.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
@@ -25,8 +25,8 @@
             ],
         }),
         "/onboard": Onboarding,
-        "/studentlogin": StudentLogin,
-        "/studentsignup": StudentSignup,
+        "/login": Login,
+        "/signup": Signup,
         "/reset-password": wrap({
             component: ResetPassword,
             conditions: [requireSession("/reset-password")],

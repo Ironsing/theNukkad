@@ -4,7 +4,7 @@ import { supabase } from './supabase';
 export type Role = 'student' | 'restaurant';
 
 // Where a logged-out user is sent for each private route, e.g. the student app
-// maps /home to /onboard and the restaurant app maps /home to /restologin.
+// maps /home to /onboard and the restaurant app maps /home to /login.
 // Every app declares its own before the router mounts. Public routes are absent.
 let signedOutRedirects: Record<string, string> = {};
 

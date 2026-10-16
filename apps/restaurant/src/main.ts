@@ -11,7 +11,7 @@ import App from './App.svelte'
 // app so the first one added behaves the same on a phone.
 configureAuth({
   signedOutRedirects: {
-    '/home': '/restologin',
+    '/home': '/login',
   },
   emailDelivery: Capacitor.isNativePlatform() ? 'code' : 'link',
 })

@@ -25,7 +25,7 @@
         <!-- Entry -->
         <div class="flex w-full flex-col items-center gap-5">
             <a
-                href="/studentlogin"
+                href="/login"
                 use:link
                 class="flex w-full items-center justify-center rounded-lg bg-acc-green px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acc-green"
             >
@@ -35,7 +35,7 @@
             <p class="text-sm text-muted">
                 New?
                 <a
-                    href="/studentsignup"
+                    href="/signup"
                     use:link
                     class="ml-1 font-medium text-acc-green underline decoration-acc-green/40 underline-offset-4 transition hover:decoration-acc-green"
                 >

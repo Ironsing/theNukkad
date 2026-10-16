@@ -11,7 +11,7 @@ import App from './App.svelte'
 configureAuth({
   signedOutRedirects: {
     '/home': '/onboard',
-    '/reset-password': '/studentlogin',
+    '/reset-password': '/login',
   },
   emailDelivery: Capacitor.isNativePlatform() ? 'code' : 'link',
 })

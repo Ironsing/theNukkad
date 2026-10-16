@@ -2,7 +2,7 @@
     import Router from "svelte-spa-router";
     import { replace } from "svelte-spa-router";
     import { wrap } from "svelte-spa-router/wrap";
-    import RestaurantLogin from "./pages/RestoLogin.svelte";
+    import Login from "./pages/Login.svelte";
     import Home from "./pages/Home.svelte";
     import { isAuthenticated, requireSession } from "@thenukkad/core";
 
@@ -10,7 +10,7 @@
         "/": wrap({
             // The router requires a component here, and the condition below never
             // lets it render: this route only picks a destination.
-            component: RestaurantLogin,
+            component: Login,
             conditions: [
                 async () => {
                     if (await isAuthenticated()) {
@@ -18,12 +18,12 @@
                         return false;
                     }
 
-                    replace("/restologin");
+                    replace("/login");
                     return false;
                 },
             ],
         }),
-        "/restologin": RestaurantLogin,
+        "/login": Login,
         "/home": wrap({
             component: Home,
             conditions: [requireSession("/home")],
