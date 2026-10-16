@@ -3,6 +3,10 @@ import { supabase } from './supabase';
 
 export type Role = 'student' | 'restaurant';
 
+// Which account type this app serves. Declared once at startup, because a page
+// has no business knowing: it just calls signIn.
+let appRole: Role | null = null;
+
 // Where a logged-out user is sent for each private route, e.g. both apps map
 // /home to their own /login. Every app declares its own before the router
 // mounts. Public routes are absent.
@@ -14,9 +18,11 @@ let signedOutRedirects: Record<string, string> = {};
 let emailDelivery: 'link' | 'code' = 'link';
 
 export function configureAuth(options: {
+    role: Role;
     signedOutRedirects: Record<string, string>;
     emailDelivery?: 'link' | 'code';
 }) {
+    appRole = options.role;
     signedOutRedirects = { ...options.signedOutRedirects };
     emailDelivery = options.emailDelivery ?? 'link';
 }
@@ -97,7 +103,9 @@ export async function verifyEmailCode(
     return data;
 }
 
-export async function signIn(
+// The password sign-in itself, with no opinion about who should be allowed to
+// stay signed in. Use signIn below.
+async function signInWithPassword(
     email: string,
     password: string,
 ) {
@@ -134,15 +142,24 @@ export async function currentRole(): Promise<Role> {
 // the meantime.
 let roleCheckInFlight = false;
 
-export async function signInWithRole(
+// Signs in, then refuses to keep the session unless the account's role is the
+// one this app declared. See configureAuth.
+export async function signIn(
     email: string,
     password: string,
-    role: Role,
 ) {
+    const role = appRole;
+
+    if (!role) {
+        throw new Error(
+            'No app role configured. Call configureAuth({ role }) at startup.',
+        );
+    }
+
     roleCheckInFlight = true;
 
     try {
-        await signIn(email, password);
+        await signInWithPassword(email, password);
 
         const actual = await currentRole();
 
@@ -210,7 +227,7 @@ export async function isAuthenticated() {
 supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_IN" && session) {
         // A role-gated sign-in owns this transition: the account type is checked
-        // first, and a wrong-role account is signed back out. See signInWithRole.
+        // first, and a wrong-role account is signed back out. See signIn.
         if (roleCheckInFlight) {
             return;
         }

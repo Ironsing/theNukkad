@@ -4,11 +4,12 @@ import { configureAuth } from '@thenukkad/core'
 import './app.css'
 import App from './App.svelte'
 
-// Where a logged-out student is sent when they land on a route that needs a
-// session. The restaurant app declares its own.
+// The student app serves student accounts; the restaurant app declares its own
+// role. Everything below is what a page can't know on its own.
 // The native apps get the code out of the confirmation and recovery emails
 // instead of the link, which can't redirect back into the WebView.
 configureAuth({
+  role: 'student',
   signedOutRedirects: {
     '/home': '/login',
     '/reset-password': '/login',

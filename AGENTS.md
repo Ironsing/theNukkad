@@ -49,6 +49,9 @@ One Auth instance serves both apps, so:
   `configureAuth({ emailDelivery })`.
 - Each app declares its own signed-out redirects in `main.ts`; both send
   `/home` to their own `/login`.
+- Each app also declares the account type it serves (`role`) in `main.ts`.
+  `signIn` refuses to keep a session for the other type, so a page never has to
+  say which app it is.
 - The role check at sign-in is convenience; the real boundary is row level
   security in `supabase/migrations`.
 - Restaurant accounts are provisioned by hand for now. There is no self-serve

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { signInWithRole } from "@thenukkad/core";
+    import { signIn } from "@thenukkad/core";
 
     let email = $state("");
     let password = $state("");
@@ -13,7 +13,7 @@
 
         try {
             // Refuses to keep a session for anything that isn't a restaurant.
-            await signInWithRole(email, password, "restaurant");
+            await signIn(email, password);
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);
         }

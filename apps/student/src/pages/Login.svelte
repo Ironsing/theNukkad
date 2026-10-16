@@ -2,7 +2,7 @@
     import { link } from "svelte-spa-router";
     import {
         passwordReset,
-        signInWithRole,
+        signIn,
         usesEmailLinks,
         verifyEmailCode,
     } from "@thenukkad/core";
@@ -22,7 +22,7 @@
         error = "";
         try {
             // Refuses to keep a session for anything that isn't a student.
-            await signInWithRole(email, password, "student");
+            await signIn(email, password);
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);
         }

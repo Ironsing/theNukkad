@@ -4,12 +4,13 @@ import { configureAuth } from '@thenukkad/core'
 import './app.css'
 import App from './App.svelte'
 
-// Where a logged-out outlet is sent when they land on a route that needs a
-// session. The student app declares its own.
+// The restaurant app serves restaurant accounts; the student app declares its
+// own role. Everything below is what a page can't know on its own.
 // Restaurant accounts are provisioned by hand, so this app has no signup or
 // password reset screens yet; the delivery mode is set to match the student
 // app so the first one added behaves the same on a phone.
 configureAuth({
+  role: 'restaurant',
   signedOutRedirects: {
     '/home': '/login',
   },
