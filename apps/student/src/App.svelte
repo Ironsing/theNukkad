@@ -3,7 +3,6 @@
     import { replace } from "svelte-spa-router";
     import { wrap } from "svelte-spa-router/wrap";
     import StudentLogin from "./pages/StudentLogin.svelte";
-    import RestaurantLogin from "./pages/RestoLogin.svelte";
     import StudentSignup from "./pages/StudentSignup.svelte";
     import Home from "./pages/Home.svelte";
     import Onboarding from "./pages/Onboarding.svelte";
@@ -27,7 +26,6 @@
         }),
         "/onboard": Onboarding,
         "/studentlogin": StudentLogin,
-        "/restologin": RestaurantLogin,
         "/studentsignup": StudentSignup,
         "/reset-password": wrap({
             component: ResetPassword,

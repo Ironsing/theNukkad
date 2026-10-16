@@ -9,9 +9,11 @@
   ],
   "scripts": {
     "dev:student": "npm run dev -w @thenukkad/student",
+    "dev:restaurant": "npm run dev -w @thenukkad/restaurant",
     "build": "npm run build --workspaces --if-present",
     "check": "npm run check --workspaces --if-present",
     "cap:sync:student": "npm run cap:sync -w @thenukkad/student",
+    "cap:sync:restaurant": "npm run cap:sync -w @thenukkad/restaurant",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop"
   },
