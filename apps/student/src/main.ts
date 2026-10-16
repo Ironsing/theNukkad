@@ -10,7 +10,7 @@ import App from './App.svelte'
 // instead of the link, which can't redirect back into the WebView.
 configureAuth({
   signedOutRedirects: {
-    '/home': '/onboard',
+    '/home': '/login',
     '/reset-password': '/login',
   },
   emailDelivery: Capacitor.isNativePlatform() ? 'code' : 'link',

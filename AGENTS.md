@@ -47,8 +47,8 @@ One Auth instance serves both apps, so:
 - The native apps cannot receive a redirect back into their WebView, so the same
   emails also carry a 6-digit code. Each app chooses in its `main.ts`, through
   `configureAuth({ emailDelivery })`.
-- Each app declares its own signed-out redirects in `main.ts`: `/home` goes to
-  `/onboard` in the student app and to `/login` in the restaurant app.
+- Each app declares its own signed-out redirects in `main.ts`; both send
+  `/home` to their own `/login`.
 - The role check at sign-in is convenience; the real boundary is row level
   security in `supabase/migrations`.
 - Restaurant accounts are provisioned by hand for now. There is no self-serve

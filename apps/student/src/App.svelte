@@ -5,13 +5,14 @@
     import Login from "./pages/Login.svelte";
     import Signup from "./pages/Signup.svelte";
     import Home from "./pages/Home.svelte";
-    import Onboarding from "./pages/Onboarding.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
     import { isAuthenticated, requireSession } from "@thenukkad/core";
 
     const routes = {
         "/": wrap({
-            component: Onboarding,
+            // The router requires a component here, and the condition below never
+            // lets it render: this route only picks a destination.
+            component: Login,
             conditions: [
                 async () => {
                     if (await isAuthenticated()) {
@@ -19,12 +20,11 @@
                         return false;
                     }
 
-                    replace("/onboard");
+                    replace("/login");
                     return false;
                 },
             ],
         }),
-        "/onboard": Onboarding,
         "/login": Login,
         "/signup": Signup,
         "/reset-password": wrap({
