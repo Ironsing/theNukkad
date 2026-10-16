@@ -14,7 +14,7 @@ configureAuth({
   signedOutRedirects: {
     '/home': '/login',
   },
-  emailDelivery: Capacitor.isNativePlatform() ? 'code' : 'link',
+  codeDelivery: Capacitor.isNativePlatform() ? 'manual' : 'link',
 })
 
 const app = mount(App, {

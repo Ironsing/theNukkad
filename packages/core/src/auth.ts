@@ -14,23 +14,23 @@ let signedOutRedirects: Record<string, string> = {};
 
 // How the confirmation and recovery emails are consumed. The web apps follow
 // the link in the email; the native apps can't receive a redirect back into
-// their WebView, so they ask the user to type the code the email also carries.
-let emailDelivery: 'link' | 'code' = 'link';
+// their WebView, so the user enters the code the email also carries by hand.
+let codeDelivery: 'link' | 'manual' = 'link';
 
 export function configureAuth(options: {
     role: Role;
     signedOutRedirects: Record<string, string>;
-    emailDelivery?: 'link' | 'code';
+    codeDelivery?: 'link' | 'manual';
 }) {
     appRole = options.role;
     signedOutRedirects = { ...options.signedOutRedirects };
-    emailDelivery = options.emailDelivery ?? 'link';
+    codeDelivery = options.codeDelivery ?? 'link';
 }
 
 // True when the app should tell the user to follow the emailed link rather than
 // asking them for the code.
 export function usesEmailLinks() {
-    return emailDelivery === 'link';
+    return codeDelivery === 'link';
 }
 
 function signedOutRedirectFor(path: string) {

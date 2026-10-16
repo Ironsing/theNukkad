@@ -14,7 +14,7 @@ configureAuth({
     '/home': '/login',
     '/reset-password': '/login',
   },
-  emailDelivery: Capacitor.isNativePlatform() ? 'code' : 'link',
+  codeDelivery: Capacitor.isNativePlatform() ? 'manual' : 'link',
 })
 
 const app = mount(App, {
