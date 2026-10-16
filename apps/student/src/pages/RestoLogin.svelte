@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { signInWithRole } from "../lib/auth";
+    import { signInWithRole } from "@thenukkad/core";
 
     let email = $state("");
     let password = $state("");

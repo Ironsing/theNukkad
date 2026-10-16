@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { currentRole, signOut, type Role } from "../lib/auth";
+    import { currentRole, signOut, type Role } from "@thenukkad/core";
 
     let role = $state<Role | null>(null);
     let error = $state("");

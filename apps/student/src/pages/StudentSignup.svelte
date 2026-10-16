@@ -1,6 +1,6 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
-    import { startSignup } from "../lib/auth";
+    import { startSignup } from "@thenukkad/core";
 
     let email = $state("");
     let password = $state("");

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
-    import { signInWithRole, passwordReset } from "../lib/auth";
+    import { signInWithRole, passwordReset } from "@thenukkad/core";
 
     let email = $state("");
     let password = $state("");

@@ -3,25 +3,37 @@ import { supabase } from './supabase';
 
 export type Role = 'student' | 'restaurant';
 
-// Every route that needs a session, mapped to where a logged-out user is sent
-// instead. Rest is public.
-const PRIVATE_ROUTES = {
-    '/home': '/onboard',
-    '/reset-password': '/studentlogin',
-};
+// Where a logged-out user is sent for each private route, e.g. the student app
+// maps /home to /onboard and the restaurant app maps /home to /restologin.
+// Every app declares its own before the router mounts. Public routes are absent.
+let signedOutRedirects: Record<string, string> = {};
 
-function privateFallback(path: string) {
-    return (PRIVATE_ROUTES as Record<string, string>)[path];
+export function configureAuth(options: {
+    signedOutRedirects: Record<string, string>;
+}) {
+    signedOutRedirects = { ...options.signedOutRedirects };
+}
+
+function signedOutRedirectFor(path: string) {
+    return signedOutRedirects[path];
 }
 
 // Guard condition for a private route: go to that route's fallback when there's no session.
-export function requireSession(path: keyof typeof PRIVATE_ROUTES) {
+export function requireSession(path: string) {
     return async () => {
         if (await isAuthenticated()) {
             return true;
         }
 
-        replace(PRIVATE_ROUTES[path]);
+        const fallback = signedOutRedirectFor(path);
+
+        if (!fallback) {
+            console.error(
+                `No signed-out redirect configured for ${path}; falling back to the root route.`,
+            );
+        }
+
+        replace(fallback ?? '/');
         return false;
     };
 }
@@ -196,7 +208,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     // This also covers
     // INITIAL_SESSION (a load or refresh with no stored session) and
     // sessions that couldn't be refreshed
-    const fallback = privateFallback(router.location);
+    const fallback = signedOutRedirectFor(router.location);
 
     if (!session && fallback) {
         replace(fallback);

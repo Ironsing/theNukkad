@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { updatePassword } from "../lib/auth";
+    import { updatePassword } from "@thenukkad/core";
 
     let password = $state("");
     let confirm = $state("");

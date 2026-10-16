@@ -8,7 +8,7 @@
     import Home from "./pages/Home.svelte";
     import Onboarding from "./pages/Onboarding.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
-    import { isAuthenticated, requireSession } from "./lib/auth";
+    import { isAuthenticated, requireSession } from "@thenukkad/core";
 
     const routes = {
         "/": wrap({

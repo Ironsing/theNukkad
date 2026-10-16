@@ -1,12 +1,3 @@
 @import 'tailwindcss';
+@import '@thenukkad/core/theme.css';
 @plugin '@tailwindcss/typography';
-
-@theme {
-  --font-google: 'Google Sans Flex', sans-serif;
-
-  --color-paper: #faf9f6;
-  --color-primary: #171717;
-  --color-muted: #565656;
-  --color-acc-orange: #ea580c;
-  --color-acc-green: #16a34a;
-}
