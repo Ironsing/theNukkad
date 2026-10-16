@@ -47,7 +47,7 @@
         >
             <div class="flex flex-col gap-2">
                 <label for="email" class="text-sm font-medium text-primary/80">
-                    Restaurant email
+                    Email address
                 </label>
 
                 <input
