@@ -258,6 +258,17 @@ otp_expiry = 3600
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"
 
+# Both templates carry a link and a code: the web apps follow the link, while
+# the native apps - which can't receive a redirect back into their WebView -
+# ask the user to type the code instead. See emailDelivery in the apps' main.ts.
+[auth.email.template.confirmation]
+subject = "Confirm your @theNukkad account"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your @theNukkad password"
+content_path = "./supabase/templates/recovery.html"
+
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
 # enabled = true

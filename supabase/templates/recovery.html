@@ -1,0 +1,17 @@
+<h2>Reset your @theNukkad password</h2>
+
+<p>
+    We received a request to reset the password for
+    <strong>{{ .Email }}</strong>.
+</p>
+
+<p>
+    <a href="{{ .ConfirmationURL }}">Choose a new password</a>
+</p>
+
+<p>
+    On the mobile app, open it and enter this code instead:<br />
+    <strong style="font-size: 24px; letter-spacing: 4px">{{ .Token }}</strong>
+</p>
+
+<p>If you didn't ask for this, you can ignore this email.</p>

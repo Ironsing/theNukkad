@@ -1,12 +1,18 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
-    import { startSignup } from "@thenukkad/core";
+    import {
+        startSignup,
+        usesEmailLinks,
+        verifyEmailCode,
+    } from "@thenukkad/core";
 
     let email = $state("");
     let password = $state("");
     let confirm = $state("");
     let error = $state("");
     let sent = $state(false);
+    let code = $state("");
+    let codeError = $state("");
 
     async function handleSubmit(event: SubmitEvent) {
         // Without this the browser performs its own GET submission, reloading the
@@ -22,6 +28,20 @@
             sent = true;
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);
+        }
+    }
+
+    // The mobile app can't follow the emailed link, so the same email carries a
+    // code and the user types it here instead.
+    async function handleVerify(event: SubmitEvent) {
+        event.preventDefault();
+        codeError = "";
+
+        try {
+            await verifyEmailCode(email, code, "signup");
+            // The auth listener sees SIGNED_IN and routes to /home.
+        } catch (e) {
+            codeError = e instanceof Error ? e.message : String(e);
         }
     }
 </script>
@@ -46,7 +66,7 @@
             </p>
         </div>
 
-        {#if sent}
+        {#if sent && usesEmailLinks()}
             <div
                 class="flex w-full flex-col gap-4 rounded-2xl border border-primary/[0.07] bg-white/60 p-6 shadow-[0_8px_40px_-20px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:p-8"
                 role="status"
@@ -61,6 +81,45 @@
                     in automatically.
                 </p>
             </div>
+        {:else if sent}
+            <!-- Confirmation code (mobile) -->
+            <form
+                class="flex w-full flex-col gap-5 rounded-2xl border border-primary/[0.07] bg-white/60 p-6 shadow-[0_8px_40px_-20px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:p-8"
+                onsubmit={handleVerify}
+            >
+                <p class="text-sm text-primary">
+                    We emailed a confirmation code to
+                    <span class="font-medium">{email}</span>.
+                </p>
+
+                <div class="flex flex-col gap-2">
+                    <label for="code" class="text-sm font-medium text-primary/80">
+                        Code
+                    </label>
+
+                    <input
+                        id="code"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        maxlength="6"
+                        required
+                        placeholder="000000"
+                        bind:value={code}
+                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-center text-lg tracking-[0.3em] text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-acc-green focus:ring-4 focus:ring-acc-green/10"
+                    />
+                </div>
+
+                {#if codeError}
+                    <p class="text-sm text-red-500">{codeError}</p>
+                {/if}
+
+                <button
+                    type="submit"
+                    class="mt-1 w-full rounded-lg bg-acc-green px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acc-green"
+                >
+                    Confirm
+                </button>
+            </form>
         {:else}
             <!-- Signup form -->
             <form

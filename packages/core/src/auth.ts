@@ -8,10 +8,23 @@ export type Role = 'student' | 'restaurant';
 // Every app declares its own before the router mounts. Public routes are absent.
 let signedOutRedirects: Record<string, string> = {};
 
+// How the confirmation and recovery emails are consumed. The web apps follow
+// the link in the email; the native apps can't receive a redirect back into
+// their WebView, so they ask the user to type the code the email also carries.
+let emailDelivery: 'link' | 'code' = 'link';
+
 export function configureAuth(options: {
     signedOutRedirects: Record<string, string>;
+    emailDelivery?: 'link' | 'code';
 }) {
     signedOutRedirects = { ...options.signedOutRedirects };
+    emailDelivery = options.emailDelivery ?? 'link';
+}
+
+// True when the app should tell the user to follow the emailed link rather than
+// asking them for the code.
+export function usesEmailLinks() {
+    return emailDelivery === 'link';
 }
 
 function signedOutRedirectFor(path: string) {
@@ -52,6 +65,29 @@ export async function startSignup(
         options: {
             emailRedirectTo: `${window.location.origin}/`,
         },
+    });
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+export type EmailCodeType = 'signup' | 'recovery';
+
+// Signup confirmations and password resets reach the user as a link (web) or as
+// a code (native); this is the code half. It yields a session the same way the
+// link does, so the auth listener routes the user on as usual.
+export async function verifyEmailCode(
+    email: string,
+    token: string,
+    type: EmailCodeType,
+) {
+    const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type,
     });
 
     if (error) {
