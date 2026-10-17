@@ -5,7 +5,7 @@
     import Signup from "./pages/Signup.svelte";
     import Home from "./pages/Home.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
-    import { redirectSignedInTo, requireSession } from "@thenukkad/core";
+    import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
     const routes = {
         "/": wrap({
@@ -18,11 +18,11 @@
         "/signup": Signup,
         "/reset-password": wrap({
             component: ResetPassword,
-            conditions: [requireSession("/reset-password")],
+            conditions: [requireSignedIn("/reset-password")],
         }),
         "/home": wrap({
             component: Home,
-            conditions: [requireSession("/home")],
+            conditions: [requireSignedIn("/home")],
         }),
     };
 </script>

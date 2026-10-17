@@ -89,9 +89,9 @@ function signedOutRedirectFor(path: string) {
     return fallback ?? '/';
 }
 
-// Guard condition for a private route: render it when there is a session, and
-// send the user to that route's signed-out redirect when there isn't.
-export function requireSession(path: string): RoutePrecondition {
+// Guard condition for a private route: a signed-in user gets to see it, everyone
+// else is sent to that route's signed-out redirect.
+export function requireSignedIn(path: string): RoutePrecondition {
     return async () => {
         if (await isAuthenticated()) {
             return true;
