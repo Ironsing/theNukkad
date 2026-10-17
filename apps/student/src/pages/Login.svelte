@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { link } from "svelte-spa-router";
+    import { link, push } from "svelte-spa-router";
     import {
         passwordReset,
         signIn,
@@ -22,7 +22,10 @@
         error = "";
         try {
             // Refuses to keep a session for anything that isn't a student.
-            await signIn(email, password);
+            await signIn(email, password, "student");
+            // Signing in doesn't navigate on its own: a gated sign-in owns this
+            // transition, so it is the caller that moves the user on.
+            push("/home");
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);
         }

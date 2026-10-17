@@ -1,21 +1,23 @@
 import { mount } from 'svelte'
 import { Capacitor } from '@capacitor/core'
-import { configureAuth } from '@thenukkad/core'
+import { configureCodeDelivery, watchSession } from '@thenukkad/core'
 import './app.css'
 import App from './App.svelte'
 
-// The student app serves student accounts; the restaurant app declares its own
-// role. Everything below is what a page can't know on its own.
-// The native apps get the code out of the confirmation and recovery emails
-// instead of the link, which can't redirect back into the WebView.
-configureAuth({
-  role: 'student',
+// The routes this app has, and where a signed-out visitor belongs on each: what
+// a page can't know on its own.
+watchSession({
+  home: '/home',
+  resetPassword: '/reset-password',
   signedOutRedirects: {
     '/home': '/login',
     '/reset-password': '/login',
   },
-  codeDelivery: Capacitor.isNativePlatform() ? 'manual' : 'link',
 })
+
+// The native app gets a code out of the confirmation and recovery emails
+// instead of the link, which can't redirect back into the WebView.
+configureCodeDelivery(Capacitor.isNativePlatform() ? 'manual' : 'link')
 
 const app = mount(App, {
   target: document.getElementById('app')!,

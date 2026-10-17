@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { push } from "svelte-spa-router";
     import { signIn } from "@thenukkad/core";
 
     let email = $state("");
@@ -13,7 +14,10 @@
 
         try {
             // Refuses to keep a session for anything that isn't a restaurant.
-            await signIn(email, password);
+            await signIn(email, password, "restaurant");
+            // Signing in doesn't navigate on its own: a gated sign-in owns this
+            // transition, so it is the caller that moves the user on.
+            push("/home");
         } catch (e) {
             error = e instanceof Error ? e.message : String(e);
         }
