@@ -6,21 +6,21 @@ import { isAuthenticated, isSignInInFlight } from './auth';
 // map is the app's private-route table: the guard below reads it as people
 // arrive, and the redirects below read it when a session dies under someone who
 // is already sitting on a private route.
-export type SessionRoutes = {
+export type AuthRedirects = {
     home: string;
     resetPassword: string;
     signedOutRedirects: Record<string, string>;
 };
 
-let routes: SessionRoutes | null = null;
+let redirects: AuthRedirects | null = null;
 
 // Every redirect this app performs in response to an auth change. Called once
 // from main.ts, explicitly: importing a module must not start navigating, so
 // the app opts in.
-export function enableRedirectsOnAuthChanges(options: SessionRoutes) {
+export function enableRedirectsOnAuthChanges(options: AuthRedirects) {
     const { home, resetPassword, signedOutRedirects } = options;
 
-    routes = { home, resetPassword, signedOutRedirects };
+    redirects = { home, resetPassword, signedOutRedirects };
 
     // The single place that moves the user between public and protected pages
     supabase.auth.onAuthStateChange((event, session) => {
@@ -82,7 +82,7 @@ export function requireSession(path: string) {
             return true;
         }
 
-        const fallback = routes?.signedOutRedirects[path];
+        const fallback = redirects?.signedOutRedirects[path];
 
         if (!fallback) {
             console.error(
