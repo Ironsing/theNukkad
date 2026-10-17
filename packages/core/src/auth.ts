@@ -24,7 +24,7 @@ export function usesEmailLinks() {
 // password is accepted, but the account type is only knowable after that (the
 // profile row needs the session to be readable), and a mismatch signs the user
 // straight back out - so whoever watches for session changes must not move them
-// on in the meantime. See session.ts.
+// on in the meantime. See auth_routing.ts.
 let signInInFlight = false;
 
 export function isSignInInFlight() {

@@ -1,3 +1,3 @@
 export * from './auth';
-export * from './session';
+export * from './auth_routing';
 export { supabase } from './supabase';
