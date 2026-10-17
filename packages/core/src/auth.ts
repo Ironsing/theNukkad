@@ -108,8 +108,8 @@ export async function currentRole(): Promise<Role> {
 // one this app serves.
 //
 // Moving the user on is not this module's business: whoever calls this has to
-// navigate once it resolves, because the session watcher deliberately sits out
-// the SIGNED_IN this produces (see isSignInInFlight).
+// navigate once it resolves, because the auth-change redirects deliberately sit
+// out the SIGNED_IN this produces (see isSignInInFlight).
 export async function signIn(
     email: string,
     password: string,

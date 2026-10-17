@@ -1,6 +1,9 @@
 import { mount } from 'svelte'
 import { Capacitor } from '@capacitor/core'
-import { configureCodeDelivery, watchSession } from '@thenukkad/core'
+import {
+  configureCodeDelivery,
+  enableRedirectsOnAuthChanges,
+} from '@thenukkad/core'
 import './app.css'
 import App from './App.svelte'
 
@@ -8,7 +11,7 @@ import App from './App.svelte'
 // a page can't know on its own. Restaurant accounts are provisioned by hand, so
 // there is no password reset screen yet; the route is still named so that a
 // recovery session has somewhere to land once one is added.
-watchSession({
+enableRedirectsOnAuthChanges({
   home: '/home',
   resetPassword: '/reset-password',
   signedOutRedirects: {

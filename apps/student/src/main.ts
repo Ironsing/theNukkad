@@ -1,12 +1,15 @@
 import { mount } from 'svelte'
 import { Capacitor } from '@capacitor/core'
-import { configureCodeDelivery, watchSession } from '@thenukkad/core'
+import {
+  configureCodeDelivery,
+  enableRedirectsOnAuthChanges,
+} from '@thenukkad/core'
 import './app.css'
 import App from './App.svelte'
 
 // The routes this app has, and where a signed-out visitor belongs on each: what
 // a page can't know on its own.
-watchSession({
+enableRedirectsOnAuthChanges({
   home: '/home',
   resetPassword: '/reset-password',
   signedOutRedirects: {

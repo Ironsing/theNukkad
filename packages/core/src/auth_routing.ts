@@ -4,8 +4,8 @@ import { isAuthenticated, isSignInInFlight } from './auth';
 
 // The routes this app has, and where a signed-out visitor belongs on each. That
 // map is the app's private-route table: the guard below reads it as people
-// arrive, and the session watcher reads it when a session dies under someone
-// who is already sitting on a private route.
+// arrive, and the redirects below read it when a session dies under someone who
+// is already sitting on a private route.
 export type SessionRoutes = {
     home: string;
     resetPassword: string;
@@ -14,9 +14,10 @@ export type SessionRoutes = {
 
 let routes: SessionRoutes | null = null;
 
-// Connects the session to the router. Called once from main.ts - explicitly,
-// because importing this module must have no side effects.
-export function watchSession(options: SessionRoutes) {
+// Every redirect this app performs in response to an auth change. Called once
+// from main.ts, explicitly: importing a module must not start navigating, so
+// the app opts in.
+export function enableRedirectsOnAuthChanges(options: SessionRoutes) {
     const { home, resetPassword, signedOutRedirects } = options;
 
     routes = { home, resetPassword, signedOutRedirects };
