@@ -1,11 +1,12 @@
-import { push, replace, router } from 'svelte-spa-router';
+import { push, replace, router, type RoutePrecondition } from 'svelte-spa-router';
 import { supabase } from './supabase';
 import { isAuthenticated, isSignInInFlight } from './auth';
 
-// The routes this app has, and where a signed-out visitor belongs on each. That
-// map is the app's private-route table: the guard below reads it as people
-// arrive, and the redirects below read it when a session dies under someone who
-// is already sitting on a private route.
+// Every route this app guards, and where a signed-out visitor is sent from it.
+// The root route belongs here too, even though it only forwards: without a
+// session it forwards to the same place as everything else. The redirects below
+// read the map again when a session dies under someone already on a guarded
+// route.
 export type AuthRedirects = {
     home: string;
     resetPassword: string;
@@ -74,23 +75,44 @@ export function enableRedirectsOnAuthChanges(options: AuthRedirects) {
     });
 }
 
-// Guard condition for a private route: go to that route's fallback when there's
-// no session.
-export function requireSession(path: string) {
+// Where a signed-out visitor is sent from a route. Every guarded route has an
+// entry, so a miss here is a bug in the app's declaration.
+function signedOutRedirectFor(path: string) {
+    const fallback = redirects?.signedOutRedirects[path];
+
+    if (!fallback) {
+        console.error(
+            `No signed-out redirect configured for ${path}; falling back to the root route.`,
+        );
+    }
+
+    return fallback ?? '/';
+}
+
+// Guard condition for a private route: render it when there is a session, and
+// send the user to that route's signed-out redirect when there isn't.
+export function requireSession(path: string): RoutePrecondition {
     return async () => {
         if (await isAuthenticated()) {
             return true;
         }
 
-        const fallback = redirects?.signedOutRedirects[path];
+        replace(signedOutRedirectFor(path));
+        return false;
+    };
+}
 
-        if (!fallback) {
-            console.error(
-                `No signed-out redirect configured for ${path}; falling back to the root route.`,
-            );
+// Guard condition for a route that only picks a destination - the root route in
+// both apps. It never renders either way: with a session the user lands on
+// `path`, without one on this route's own signed-out redirect.
+export function requireSessionForRedirect(path: string): RoutePrecondition {
+    return async (detail) => {
+        if (!(await isAuthenticated())) {
+            replace(signedOutRedirectFor(detail.location));
+            return false;
         }
 
-        replace(fallback ?? '/');
+        replace(path);
         return false;
     };
 }

@@ -13,6 +13,7 @@ enableRedirectsOnAuthChanges({
   home: '/home',
   resetPassword: '/reset-password',
   signedOutRedirects: {
+    '/': '/login',
     '/home': '/login',
     '/reset-password': '/login',
   },
