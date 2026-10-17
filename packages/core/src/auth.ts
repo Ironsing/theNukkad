@@ -1,30 +1,17 @@
-import { push, replace, router } from 'svelte-spa-router';
 import { supabase } from './supabase';
 
 export type Role = 'student' | 'restaurant';
-
-// Which account type this app serves. Declared once at startup, because a page
-// has no business knowing: it just calls signIn.
-let appRole: Role | null = null;
-
-// Where a logged-out user is sent for each private route, e.g. both apps map
-// /home to their own /login. Every app declares its own before the router
-// mounts. Public routes are absent.
-let signedOutRedirects: Record<string, string> = {};
+export type EmailCodeType = 'signup' | 'recovery';
 
 // How the confirmation and recovery emails are consumed. The web apps follow
 // the link in the email; the native apps can't receive a redirect back into
 // their WebView, so the user enters the code the email also carries by hand.
-let codeDelivery: 'link' | 'manual' = 'link';
+export type CodeDelivery = 'link' | 'manual';
 
-export function configureAuth(options: {
-    role: Role;
-    signedOutRedirects: Record<string, string>;
-    codeDelivery?: 'link' | 'manual';
-}) {
-    appRole = options.role;
-    signedOutRedirects = { ...options.signedOutRedirects };
-    codeDelivery = options.codeDelivery ?? 'link';
+let codeDelivery: CodeDelivery = 'link';
+
+export function configureCodeDelivery(delivery: CodeDelivery) {
+    codeDelivery = delivery;
 }
 
 // True when the app should tell the user to follow the emailed link rather than
@@ -33,32 +20,15 @@ export function usesEmailLinks() {
     return codeDelivery === 'link';
 }
 
-function signedOutRedirectFor(path: string) {
-    return signedOutRedirects[path];
-}
+// Set while a role-gated sign-in is in flight. SIGNED_IN fires as soon as the
+// password is accepted, but the account type is only knowable after that (the
+// profile row needs the session to be readable), and a mismatch signs the user
+// straight back out - so whoever watches for session changes must not move them
+// on in the meantime. See session.ts.
+let signInInFlight = false;
 
-// Guard condition for a private route: go to that route's fallback when there's no session.
-export function requireSession(path: string) {
-    return async () => {
-        if (await isAuthenticated()) {
-            return true;
-        }
-
-        const fallback = signedOutRedirectFor(path);
-
-        if (!fallback) {
-            console.error(
-                `No signed-out redirect configured for ${path}; falling back to the root route.`,
-            );
-        }
-
-        replace(fallback ?? '/');
-        return false;
-    };
-}
-
-export function isAuthCallbackPending() {
-    return new URLSearchParams(window.location.search).has('code');
+export function isSignInInFlight() {
+    return signInInFlight;
 }
 
 export async function startSignup(
@@ -80,11 +50,9 @@ export async function startSignup(
     return data;
 }
 
-export type EmailCodeType = 'signup' | 'recovery';
-
 // Signup confirmations and password resets reach the user as a link (web) or as
 // a code (native); this is the code half. It yields a session the same way the
-// link does, so the auth listener routes the user on as usual.
+// link does.
 export async function verifyEmailCode(
     email: string,
     token: string,
@@ -117,6 +85,7 @@ async function signInWithPassword(
     if (error) {
         throw error;
     }
+
     return data;
 }
 
@@ -135,28 +104,18 @@ export async function currentRole(): Promise<Role> {
     return data.role as Role;
 }
 
-// Set while a role-gated sign-in is in flight. SIGNED_IN fires as soon as the
-// password is accepted, but the account type is only knowable after that (the
-// profile row needs the session to be readable), and a mismatch signs the user
-// straight back out - so the listener below must not bounce them to /home in
-// the meantime.
-let roleCheckInFlight = false;
-
 // Signs in, then refuses to keep the session unless the account's role is the
-// one this app declared. See configureAuth.
+// one this app serves.
+//
+// Moving the user on is not this module's business: whoever calls this has to
+// navigate once it resolves, because the session watcher deliberately sits out
+// the SIGNED_IN this produces (see isSignInInFlight).
 export async function signIn(
     email: string,
     password: string,
+    role: Role,
 ) {
-    const role = appRole;
-
-    if (!role) {
-        throw new Error(
-            'No app role configured. Call configureAuth({ role }) at startup.',
-        );
-    }
-
-    roleCheckInFlight = true;
+    signInInFlight = true;
 
     try {
         await signInWithPassword(email, password);
@@ -172,11 +131,8 @@ export async function signIn(
                     : 'That account is not a student account.',
             );
         }
-
-        // The listener deliberately sat this one out, so navigating is up to us.
-        push('/home');
     } finally {
-        roleCheckInFlight = false;
+        signInInFlight = false;
     }
 }
 
@@ -222,50 +178,3 @@ export async function isAuthenticated() {
 
     return Boolean(data.session);
 }
-
-// The single place that moves the user between public and protected pages
-supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN" && session) {
-        // A role-gated sign-in owns this transition: the account type is checked
-        // first, and a wrong-role account is signed back out. See signIn.
-        if (roleCheckInFlight) {
-            return;
-        }
-
-        if (router.location !== "/home") {
-            push("/home");
-        }
-        return;
-    }
-
-    // A password reset link produces a recovery session, and emits
-    // PASSWORD_RECOVERY rather than SIGNED_IN. The user is not "logged in" yet -
-    // they still have to choose a new password - so this must not fall through
-    // to /home
-    if (event === "PASSWORD_RECOVERY" && session) {
-        if (router.location !== "/reset-password") {
-            push("/reset-password");
-        }
-        return;
-    }
-
-    // The password has been changed. Until then, stay put on /reset-password:
-    // INITIAL_SESSION arrives on every page load (including right after the
-    // recovery exchange), and bouncing to /home on it would pull the user
-    // off the form before they could choose a password.
-    if (event === "USER_UPDATED" && session && router.location === "/reset-password") {
-        push("/home");
-        return;
-    }
-
-    // This also covers
-    // INITIAL_SESSION (a load or refresh with no stored session) and
-    // sessions that couldn't be refreshed
-    const fallback = signedOutRedirectFor(router.location);
-
-    if (!session && fallback) {
-        replace(fallback);
-    }
-});
-
-
