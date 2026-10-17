@@ -103,9 +103,9 @@ export function requireSession(path: string): RoutePrecondition {
 }
 
 // Guard condition for a route that only picks a destination - the root route in
-// both apps. It never renders either way: with a session the user lands on
-// `path`, without one on this route's own signed-out redirect.
-export function requireSessionForRedirect(path: string): RoutePrecondition {
+// both apps. It always redirects and never renders: a signed-in user lands on
+// `path`, a signed-out one on this route's own signed-out redirect.
+export function redirectSignedInTo(path: string): RoutePrecondition {
     return async (detail) => {
         if (!(await isAuthenticated())) {
             replace(signedOutRedirectFor(detail.location));

@@ -3,14 +3,14 @@
     import { wrap } from "svelte-spa-router/wrap";
     import Login from "./pages/Login.svelte";
     import Home from "./pages/Home.svelte";
-    import { requireSession, requireSessionForRedirect } from "@thenukkad/core";
+    import { redirectSignedInTo, requireSession } from "@thenukkad/core";
 
     const routes = {
         "/": wrap({
             // The router requires a component here, and the condition below never
             // lets it render: this route only picks a destination.
             component: Login,
-            conditions: [requireSessionForRedirect("/home")],
+            conditions: [redirectSignedInTo("/home")],
         }),
         "/login": Login,
         "/home": wrap({
