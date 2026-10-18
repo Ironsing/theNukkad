@@ -1,3 +1,8 @@
 @import 'tailwindcss';
 @import '@thenukkad/core/theme.css';
 @plugin '@tailwindcss/typography';
+
+@theme {
+  /* The outlet app's accent. */
+  --color-accent: var(--color-accent-green);
+}

@@ -65,14 +65,14 @@
 >
     <div
         aria-hidden="true"
-        class="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-acc-green/10 blur-3xl"
+        class="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl"
     ></div>
 
     <div class="relative flex w-full max-w-sm flex-col items-center gap-10">
         <!-- Branding -->
         <div class="text-center">
             <h1 class="text-5xl font-semibold tracking-[-0.065em] text-primary">
-                <span>@the</span><span class="text-acc-green">Nukkad</span>
+                <span>@the</span><span class="text-accent">Nukkad</span>
             </h1>
 
             <p class="mt-3 text-sm tracking-wide text-muted">
@@ -107,7 +107,7 @@
                         required
                         placeholder="000000"
                         bind:value={code}
-                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-center text-lg tracking-[0.3em] text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-acc-green focus:ring-4 focus:ring-acc-green/10"
+                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-center text-lg tracking-[0.3em] text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-accent focus:ring-4 focus:ring-accent/10"
                     />
                 </div>
 
@@ -117,7 +117,7 @@
 
                 <button
                     type="submit"
-                    class="mt-1 w-full rounded-lg bg-acc-green px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acc-green"
+                    class="mt-1 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
                 >
                     Continue
                 </button>
@@ -143,7 +143,7 @@
                         placeholder="you@example.com"
                         autocomplete="email"
                         bind:value={email}
-                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-acc-green focus:ring-4 focus:ring-acc-green/10"
+                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-accent focus:ring-4 focus:ring-accent/10"
                     />
                 </div>
 
@@ -162,7 +162,7 @@
                         placeholder="Enter your password"
                         autocomplete="current-password"
                         bind:value={password}
-                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-acc-green focus:ring-4 focus:ring-acc-green/10"
+                        class="w-full rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-accent focus:ring-4 focus:ring-accent/10"
                     />
                 </div>
 
@@ -172,7 +172,7 @@
 
                 <button
                     type="submit"
-                    class="mt-1 w-full rounded-lg bg-acc-green px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acc-green"
+                    class="mt-1 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
                 >
                     Log in
                 </button>
@@ -187,7 +187,7 @@
                         type="button"
                         onclick={handleForgotPassword}
                         disabled={!email}
-                        class="w-full text-center text-sm font-medium text-acc-green underline decoration-acc-green/40 underline-offset-4 transition hover:decoration-acc-green disabled:text-primary/30 disabled:no-underline"
+                        class="w-full text-center text-sm font-medium text-accent underline decoration-accent/40 underline-offset-4 transition hover:decoration-accent disabled:text-primary/30 disabled:no-underline"
                     >
                         Forgot your password?
                     </button>

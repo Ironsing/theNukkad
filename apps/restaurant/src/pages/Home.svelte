@@ -80,7 +80,7 @@
 
     const label = "flex flex-col gap-1.5 text-sm font-medium text-primary/80";
     const field =
-        "rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 hover:border-primary/25 focus:border-acc-green";
+        "rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 hover:border-primary/25 focus:border-accent";
     // Roomier than they look: on a touch screen these are the buttons a thumb
     // actually hits.
     const step =
@@ -199,7 +199,7 @@
 
                 <button
                     type="submit"
-                    class="rounded-lg bg-acc-green px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99]"
+                    class="rounded-lg bg-accent px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99]"
                 >
                     Save
                 </button>
@@ -211,7 +211,7 @@
         {/if}
 
         {#if saved}
-            <p class="text-sm text-acc-green">{saved}</p>
+            <p class="text-sm text-accent">{saved}</p>
         {/if}
     </main>
 </div>

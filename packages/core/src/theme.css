@@ -5,6 +5,9 @@
   --color-paper: #faf9f6;
   --color-primary: #171717;
   --color-muted: #565656;
-  --color-acc-orange: #ea580c;
-  --color-acc-green: #16a34a;
+
+  /* The two accents, one per app. Which one an app wears is its own
+     `--color-accent`, set in its app.css; pages only ever say `accent`. */
+  --color-accent-green: #16a34a;
+  --color-accent-orange: #ea580c;
 }
