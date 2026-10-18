@@ -19,6 +19,10 @@ supabase/         the local backend both apps talk to
 
 `packages/core` is small: it's just Supabase, session and role logic, and tokens.
 
+The two apps are near-identical. They share every token in `packages/core/src/theme.css`, but each picks its own
+`--color-accent` in its own `app.css` (green for students, orange for outlets). New pages use the `accent`
+utilities and carry that badge, rather than hard-coding a colour.
+
 ## Running
 
 ```sh
