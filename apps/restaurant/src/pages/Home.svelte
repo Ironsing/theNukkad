@@ -1,53 +1,153 @@
 <script lang="ts">
-    import { currentRole, signOut, type Role } from "@thenukkad/core";
+    import { myOutlet, signOut, type RestaurantStatus } from "@thenukkad/core";
 
-    let role = $state<Role | null>(null);
+    let form = $state({
+        name: "",
+        opensAt: "",
+        closesAt: "",
+        status: "normal" as RestaurantStatus,
+    });
+
+    let loading = $state(true);
+    let exists = $state(false); // has this outlet ever been saved?
     let error = $state("");
+    let saved = $state("");
 
-    async function handleLogout() {
-        await signOut();
+    const message = (e: unknown) =>
+        e instanceof Error ? e.message : String(e);
+
+    $effect(() => {
+        myOutlet
+            .get()
+            .then((outlet) => {
+                if (!outlet) return;
+
+                exists = true;
+                form.name = outlet.name;
+                form.opensAt = outlet.opensAt ?? "";
+                form.closesAt = outlet.closesAt ?? "";
+                form.status = outlet.status;
+            })
+            .catch((e) => (error = message(e)))
+            .finally(() => (loading = false));
+    });
+
+    async function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+        error = "";
+        saved = "";
+
+        // The database keeps the two times together and knows nothing else about
+        // them; saying so here spares the user a constraint name.
+        if ((form.opensAt === "") !== (form.closesAt === "")) {
+            error = "Set both times, or neither.";
+            return;
+        }
+
+        try {
+            const outlet = await myOutlet.save({
+                name: form.name,
+                opensAt: form.opensAt === "" ? null : form.opensAt,
+                closesAt: form.closesAt === "" ? null : form.closesAt,
+                status: form.status,
+            });
+
+            exists = true;
+            // What the database actually holds - a trimmed name, say - rather
+            // than what was typed.
+            form.name = outlet.name;
+            saved = "Saved.";
+        } catch (e) {
+            error = message(e);
+        }
     }
 
-    // Runs once on mount. The route guard has already established that there is a
-    // session, and RLS limits this to the logged-in user's own profile row.
-    $effect(() => {
-        currentRole()
-            .then((loaded) => (role = loaded))
-            .catch((e) => (error = e instanceof Error ? e.message : String(e)));
-    });
+    const label = "flex flex-col gap-1.5 text-sm font-medium text-primary/80";
+    const field =
+        "rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 hover:border-primary/25 focus:border-acc-green";
 </script>
 
-<div
-    class="font-google relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-paper px-6 py-12"
->
-    <div
-        aria-hidden="true"
-        class="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-acc-green/10 blur-3xl"
-    ></div>
+<div class="font-google min-h-dvh bg-paper px-6 py-12 text-primary">
+    <main class="mx-auto flex w-full max-w-sm flex-col gap-8">
+        <header class="flex items-baseline justify-between">
+            <h1 class="text-2xl font-semibold tracking-[-0.03em]">
+                Your outlet
+            </h1>
 
-    <div class="relative flex w-full max-w-sm flex-col items-center gap-10">
-        <h1 class="text-5xl font-semibold text-primary">
-            hello{role ? ` ${role}` : ""}
-        </h1>
+            <button
+                type="button"
+                onclick={signOut}
+                class="text-sm text-muted hover:text-primary"
+            >
+                Log out
+            </button>
+        </header>
 
-        <p class="text-sm text-muted">
-            {#if role}
-                You're logged in as a {role}.
-            {:else}
-                You're logged in.
-            {/if}
-        </p>
+        {#if loading}
+            <p class="text-sm text-muted">Loading…</p>
+        {:else}
+            <p class="text-sm text-muted">
+                {exists
+                    ? "Students can see this outlet."
+                    : "Not set up yet. Saving puts you on the student list."}
+            </p>
+
+            <form class="flex flex-col gap-5" onsubmit={handleSubmit}>
+                <label class={label}>
+                    Name
+                    <input
+                        class={field}
+                        type="text"
+                        required
+                        maxlength="80"
+                        placeholder="A Chaat"
+                        bind:value={form.name}
+                    />
+                </label>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <label class={label}>
+                        Opens at
+                        <input
+                            class={field}
+                            type="time"
+                            bind:value={form.opensAt}
+                        />
+                    </label>
+
+                    <label class={label}>
+                        Closes at
+                        <input
+                            class={field}
+                            type="time"
+                            bind:value={form.closesAt}
+                        />
+                    </label>
+                </div>
+
+                <label class={label}>
+                    Status
+                    <select class={field} bind:value={form.status}>
+                        <option value="normal">Normal hours</option>
+                        <option value="closedManually">Closed manually</option>
+                    </select>
+                </label>
+
+                <button
+                    type="submit"
+                    class="rounded-lg bg-acc-green px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99]"
+                >
+                    Save
+                </button>
+            </form>
+        {/if}
 
         {#if error}
             <p class="text-sm text-red-500">{error}</p>
         {/if}
 
-        <button
-            type="button"
-            onclick={handleLogout}
-            class="mt-2 rounded-lg bg-red-500 px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-500"
-        >
-            Log out
-        </button>
-    </div>
+        {#if saved}
+            <p class="text-sm text-acc-green">{saved}</p>
+        {/if}
+    </main>
 </div>

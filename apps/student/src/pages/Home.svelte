@@ -1,53 +1,85 @@
 <script lang="ts">
-    import { currentRole, signOut, type Role } from "@thenukkad/core";
+    import { outlets, signOut, type Outlet } from "@thenukkad/core";
 
-    let role = $state<Role | null>(null);
+    let rows = $state<Outlet[]>([]);
+    let loading = $state(true);
     let error = $state("");
 
-    async function handleLogout() {
-        await signOut();
+    const message = (e: unknown) =>
+        e instanceof Error ? e.message : String(e);
+
+    // '19:00' as the app says it.
+    function clock(time: string) {
+        const hour = Number(time.slice(0, 2));
+
+        return `${hour % 12 || 12}:${time.slice(3, 5)} ${
+            hour < 12 ? "AM" : "PM"
+        }`;
     }
 
-    // Runs once on mount. The route guard has already established that there is a
-    // session, and RLS limits this to the logged-in user's own profile row.
     $effect(() => {
-        currentRole()
-            .then((loaded) => (role = loaded))
-            .catch((e) => (error = e instanceof Error ? e.message : String(e)));
+        outlets
+            .list()
+            .then((loaded) => (rows = loaded))
+            .catch((e) => (error = message(e)))
+            .finally(() => (loading = false));
     });
 </script>
 
-<div
-    class="font-google relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-paper px-6 py-12"
->
-    <div
-        aria-hidden="true"
-        class="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-acc-green/10 blur-3xl"
-    ></div>
+<div class="font-google min-h-dvh bg-paper px-6 py-12 text-primary">
+    <main class="mx-auto flex w-full max-w-sm flex-col gap-8">
+        <header class="flex items-baseline justify-between">
+            <h1 class="text-2xl font-semibold tracking-[-0.03em]">Outlets</h1>
 
-    <div class="relative flex w-full max-w-sm flex-col items-center gap-10">
-        <h1 class="text-5xl font-semibold text-primary">
-            hello{role ? ` ${role}` : ""}
-        </h1>
+            <button
+                type="button"
+                onclick={signOut}
+                class="text-sm text-muted hover:text-primary"
+            >
+                Log out
+            </button>
+        </header>
 
-        <p class="text-sm text-muted">
-            {#if role}
-                You're logged in as a {role}.
-            {:else}
-                You're logged in.
-            {/if}
-        </p>
+        {#if loading}
+            <p class="text-sm text-muted">Loading…</p>
+        {:else if rows.length === 0}
+            <p class="text-sm text-muted">
+                No outlets yet. They'll show up here as they set themselves up.
+            </p>
+        {:else}
+            <ul class="flex flex-col gap-3">
+                {#each rows as outlet (outlet.id)}
+                    <li
+                        class="flex items-baseline justify-between gap-4 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3"
+                    >
+                        <span class="flex flex-col">
+                            <span class="text-sm font-medium"
+                                >{outlet.name}</span
+                            >
+
+                            <span class="text-xs text-muted">
+                                <!-- Unset together or set together, so one test
+                                     covers both. -->
+                                {outlet.opensAt && outlet.closesAt
+                                    ? `${clock(outlet.opensAt)} to ${clock(outlet.closesAt)}`
+                                    : "Hours not set"}
+                            </span>
+                        </span>
+
+                        <!-- Only the exception is marked: everything else is
+                             running to its hours. -->
+                        {#if outlet.status === "closedManually"}
+                            <span class="text-xs font-medium text-red-500">
+                                Closed
+                            </span>
+                        {/if}
+                    </li>
+                {/each}
+            </ul>
+        {/if}
 
         {#if error}
             <p class="text-sm text-red-500">{error}</p>
         {/if}
-
-        <button
-            type="button"
-            onclick={handleLogout}
-            class="mt-2 rounded-lg bg-red-500 px-4 py-3 text-sm font-medium text-paper transition duration-200 hover:brightness-95 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-500"
-        >
-            Log out
-        </button>
-    </div>
+    </main>
 </div>
