@@ -89,6 +89,23 @@ async function signInWithPassword(
     return data;
 }
 
+// The signed-in user's own id, from the session this client already holds.
+// Reading it locally is enough: the policies compare a row against the same
+// session, so a stale answer here cannot get anyone anywhere.
+export async function currentUserId(): Promise<string> {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+        throw error;
+    }
+
+    if (data.session === null) {
+        throw new Error('Not signed in.');
+    }
+
+    return data.session.user.id;
+}
+
 // The account type of the logged-in user. Read from our own table rather than
 // trusted from anywhere client-side: RLS only lets a user select their own row.
 export async function currentRole(): Promise<Role> {
