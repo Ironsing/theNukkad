@@ -11,7 +11,7 @@ This is a monorepo managed using npm workspaces. It contains two apps: one for s
 
 ```
 apps/student/     signup, login, password reset, orders
-apps/restaurant/  login, incoming orders, OTP check
+apps/restaurant/  login, password reset, incoming orders, OTP check
 packages/core/    what both apps share: the Supabase client, the auth helpers
                   and the Tailwind design tokens
 supabase/         the local backend both apps talk to
@@ -52,8 +52,8 @@ One Auth instance serves both apps, so:
   say which app it is.
 - The role check at sign-in is convenience; the real boundary is row level
   security in `supabase/migrations`.
-- Restaurant accounts are provisioned by hand for now. There is no self-serve
-  restaurant signup, and the restaurant app has no password reset screen yet.
+- Restaurant accounts are provisioned by hand for now: there is no self-serve
+  restaurant signup. Both apps reset passwords the same way.
 
 ## Functionality
 The two flows to implement are:
