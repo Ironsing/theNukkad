@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { outlets, signOut, type Outlet } from "@thenukkad/core";
+    import { fold, outlets, signOut, type Outlet } from "@thenukkad/core";
 
     let rows = $state<Outlet[]>([]);
     let loading = $state(true);
@@ -23,6 +23,8 @@
             .then((loaded) => (rows = loaded))
             .catch((e) => (error = message(e)))
             .finally(() => (loading = false));
+
+        return outlets.subscribe((change) => (rows = fold(rows, change)));
     });
 </script>
 

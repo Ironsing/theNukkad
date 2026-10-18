@@ -15,6 +15,13 @@ export type Outlet = {
     status: RestaurantStatus;
 };
 
+// A change to one outlet, in the terms a page folds it into what it is showing.
+// A delete names a row without describing it: with the default replica identity
+// the old record is the primary key and nothing more.
+export type OutletChange =
+    | { kind: 'saved'; outlet: Outlet }
+    | { kind: 'removed'; id: string };
+
 // The same row in Postgres' own spelling. Shared with my_outlet.ts, which writes
 // rows of the same shape.
 export type OutletRow = {
@@ -44,6 +51,54 @@ export function toOutlet(row: OutletRow): Outlet {
         // this is only telling TypeScript what Postgres already guarantees.
         status: row.status as RestaurantStatus,
     };
+}
+
+// The API's payload in our terms, read once, here. Every field is optional
+// because an insert carries no old record and a delete no new one, and because
+// this is wire data: it is checked, not trusted.
+type ChangePayload = {
+    eventType: string;
+    new: Partial<OutletRow>;
+    old: Partial<OutletRow>;
+};
+
+function toChange(payload: ChangePayload): OutletChange | null {
+    if (payload.eventType === 'DELETE') {
+        // A delete names its row without describing it.
+        const { id } = payload.old;
+
+        return id === undefined ? null : { kind: 'removed', id };
+    }
+
+    const { id, name, opens_at, closes_at, status } = payload.new;
+
+    // A row missing the columns we show is not a row we can show.
+    if (id === undefined || name === undefined || status === undefined) {
+        return null;
+    }
+
+    return {
+        kind: 'saved',
+        outlet: toOutlet({
+            id,
+            name,
+            opens_at: opens_at ?? null,
+            closes_at: closes_at ?? null,
+            status,
+        }),
+    };
+}
+
+// Folds one change into a list, keeping the order `list` asks for, so a change
+// and a refetch leave the same list behind. localeCompare is the closest thing
+// the browser has to the collation Postgres ordered by.
+export function fold(rows: Outlet[], change: OutletChange): Outlet[] {
+    const id = change.kind === 'saved' ? change.outlet.id : change.id;
+    const kept = rows.filter((row) => row.id !== id);
+
+    return change.kind === 'saved'
+        ? [...kept, change.outlet].sort((a, b) => a.name.localeCompare(b.name))
+        : kept;
 }
 
 // What a student can do with outlets: read them, and nothing else. RLS says the
@@ -81,6 +136,39 @@ export class Outlets {
         }
 
         return data === null ? null : toOutlet(data);
+    }
+
+    // Live changes to every outlet this account may read: all of them for a
+    // student, its own row for a restaurant, decided by the policies exactly as
+    // `list` decides it - except for deletes, which arrive no matter what the
+    // policies say, because a row that is gone cannot be checked against them.
+    // Nothing can delete an outlet today, so a delete reads as an id and no more.
+    //
+    // Returns the unsubscribe, which a page calls when it goes away, or the
+    // channel goes on listening for a page nobody is looking at. Changes made in
+    // the moment after subscribing can be missed while the server is still
+    // setting the subscription up; the next change, or a refetch, puts it right.
+    subscribe(onChange: (change: OutletChange) => void): () => void {
+        const channel = supabase
+            .channel('outlet-changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'restaurant_info' },
+                (payload) => {
+                    const change = toChange(payload);
+
+                    // A payload we cannot make sense of is dropped rather than
+                    // thrown: it is a stream, and the next event is still good.
+                    if (change !== null) {
+                        onChange(change);
+                    }
+                },
+            )
+            .subscribe();
+
+        return () => {
+            void supabase.removeChannel(channel);
+        };
     }
 }
 
