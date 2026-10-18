@@ -3,6 +3,7 @@
     import { wrap } from "svelte-spa-router/wrap";
     import Login from "./pages/Login.svelte";
     import Home from "./pages/Home.svelte";
+    import ResetPassword from "./pages/ResetPassword.svelte";
     import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
     const routes = {
@@ -13,6 +14,10 @@
             conditions: [redirectSignedInTo("/home")],
         }),
         "/login": Login,
+        "/reset-password": wrap({
+            component: ResetPassword,
+            conditions: [requireSignedIn("/reset-password")],
+        }),
         "/home": wrap({
             component: Home,
             conditions: [requireSignedIn("/home")],
