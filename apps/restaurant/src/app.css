@@ -3,6 +3,7 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  /* The outlet app's accent. */
-  --color-accent: var(--color-accent-green);
+  /* The outlet app's accent: orange, so no screen here is ever mistaken for the
+     student app's. */
+  --color-accent: var(--color-accent-orange);
 }
