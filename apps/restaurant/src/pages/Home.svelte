@@ -89,6 +89,12 @@
 
 <div class="font-google min-h-dvh bg-paper px-6 py-12 text-primary">
     <main class="mx-auto flex w-full max-w-sm flex-col gap-8">
+        <p
+            class="inline-flex items-center self-start rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-medium tracking-wide text-accent uppercase"
+        >
+            Outlet app
+        </p>
+
         <header class="flex items-baseline justify-between">
             <h1 class="text-2xl font-semibold tracking-[-0.03em]">
                 Your outlet

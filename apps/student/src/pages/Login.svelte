@@ -74,6 +74,12 @@
                 <span>@the</span><span class="text-accent">Nukkad</span>
             </h1>
 
+            <p
+                class="mt-4 inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-medium tracking-wide text-accent uppercase"
+            >
+                Student app
+            </p>
+
             <p class="mt-3 text-sm tracking-wide text-muted">
                 Advance orders for indie food outlets on campus.
             </p>
