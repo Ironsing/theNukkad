@@ -16,6 +16,22 @@
     const message = (e: unknown) =>
         e instanceof Error ? e.message : String(e);
 
+    const STEP = 30;
+    function shift(time: string, minutes: number) {
+        const [hours, mins] = (time === "" ? "00:00" : time)
+            .split(":")
+            .map(Number);
+        const day = 24 * 60;
+        const total = (hours * 60 + mins + minutes + day) % day;
+        const pad = (n: number) => String(n).padStart(2, "0");
+
+        return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
+    }
+
+    function shiftBy(which: "opensAt" | "closesAt", minutes: number) {
+        form[which] = shift(form[which], minutes);
+    }
+
     $effect(() => {
         myOutlet
             .get()
@@ -65,6 +81,10 @@
     const label = "flex flex-col gap-1.5 text-sm font-medium text-primary/80";
     const field =
         "rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 hover:border-primary/25 focus:border-acc-green";
+    // Roomier than they look: on a touch screen these are the buttons a thumb
+    // actually hits.
+    const step =
+        "flex-1 rounded-lg border border-primary/15 px-2 py-2.5 text-xs font-normal text-muted transition duration-200 hover:border-primary/25 hover:text-primary active:scale-[0.99]";
 </script>
 
 <div class="font-google min-h-dvh bg-paper px-6 py-12 text-primary">
@@ -106,23 +126,67 @@
                 </label>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <label class={label}>
-                        Opens at
+                    <div class={label}>
+                        <label for="opensAt">Opens at</label>
+
                         <input
+                            id="opensAt"
                             class={field}
                             type="time"
                             bind:value={form.opensAt}
                         />
-                    </label>
 
-                    <label class={label}>
-                        Closes at
+                        <div class="flex gap-2">
+                            <button
+                                type="button"
+                                class={step}
+                                onclick={() => shiftBy("opensAt", -STEP)}
+                                aria-label="Opens half an hour earlier"
+                            >
+                                −30m
+                            </button>
+
+                            <button
+                                type="button"
+                                class={step}
+                                onclick={() => shiftBy("opensAt", STEP)}
+                                aria-label="Opens half an hour later"
+                            >
+                                +30m
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class={label}>
+                        <label for="closesAt">Closes at</label>
+
                         <input
+                            id="closesAt"
                             class={field}
                             type="time"
                             bind:value={form.closesAt}
                         />
-                    </label>
+
+                        <div class="flex gap-2">
+                            <button
+                                type="button"
+                                class={step}
+                                onclick={() => shiftBy("closesAt", -STEP)}
+                                aria-label="Closes half an hour earlier"
+                            >
+                                −30m
+                            </button>
+
+                            <button
+                                type="button"
+                                class={step}
+                                onclick={() => shiftBy("closesAt", STEP)}
+                                aria-label="Closes half an hour later"
+                            >
+                                +30m
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <label class={label}>
