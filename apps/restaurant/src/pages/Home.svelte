@@ -1,5 +1,9 @@
 <script lang="ts">
     import { myOutlet, signOut, type RestaurantStatus } from "@thenukkad/core";
+    import MenuControls from "../components/MenuControls.svelte";
+
+    // Two sides of the same outlet: what it is, and what it sells.
+    let tab = $state<"outlet" | "menu">("outlet");
 
     let form = $state({
         name: "",
@@ -97,7 +101,7 @@
 
         <header class="flex items-baseline justify-between">
             <h1 class="text-2xl font-semibold tracking-[-0.03em]">
-                Your outlet
+                {tab === "outlet" ? "Your outlet" : "Your menu"}
             </h1>
 
             <button
@@ -109,7 +113,40 @@
             </button>
         </header>
 
-        {#if loading}
+        <div
+            role="tablist"
+            class="flex gap-1 rounded-xl border border-primary/[0.07] bg-white/60 p-1"
+        >
+            <button
+                role="tab"
+                type="button"
+                aria-selected={tab === "outlet"}
+                onclick={() => (tab = "outlet")}
+                class="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition duration-200 {tab ===
+                'outlet'
+                    ? 'bg-accent/10 text-accent'
+                    : 'text-muted hover:text-primary'}"
+            >
+                Outlet
+            </button>
+
+            <button
+                role="tab"
+                type="button"
+                aria-selected={tab === "menu"}
+                onclick={() => (tab = "menu")}
+                class="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition duration-200 {tab ===
+                'menu'
+                    ? 'bg-accent/10 text-accent'
+                    : 'text-muted hover:text-primary'}"
+            >
+                Menu
+            </button>
+        </div>
+
+        {#if tab === "menu"}
+            <MenuControls outletExists={exists} />
+        {:else if loading}
             <p class="text-sm text-muted">Loading…</p>
         {:else}
             <p class="text-sm text-muted">
@@ -210,14 +247,14 @@
                     Save
                 </button>
             </form>
-        {/if}
 
-        {#if error}
-            <p class="text-sm text-red-500">{error}</p>
-        {/if}
+            {#if error}
+                <p class="text-sm text-red-500">{error}</p>
+            {/if}
 
-        {#if saved}
-            <p class="text-sm text-accent">{saved}</p>
+            {#if saved}
+                <p class="text-sm text-accent">{saved}</p>
+            {/if}
         {/if}
     </main>
 </div>

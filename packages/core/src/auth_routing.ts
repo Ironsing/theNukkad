@@ -67,7 +67,7 @@ export function enableRedirectsOnAuthChanges(options: AuthRedirects) {
 
         // This also covers INITIAL_SESSION (a load or refresh with no stored
         // session) and sessions that couldn't be refreshed.
-        const fallback = signedOutRedirects[router.location];
+        const fallback = redirectForLocation(router.location);
 
         if (!session && fallback) {
             replace(fallback);
@@ -75,10 +75,40 @@ export function enableRedirectsOnAuthChanges(options: AuthRedirects) {
     });
 }
 
+// Whether a location is the one a declared pattern names: '/menu/abc' is
+// '/menu/:id'. Compared part by part, and a part starting with ':' stands for
+// whatever is there, so long as it is there.
+function matchesPattern(pattern: string, location: string): boolean {
+    const expected = pattern.split('/');
+    const actual = location.split('/');
+
+    return (
+        expected.length === actual.length &&
+        expected.every((part, i) =>
+            part.startsWith(':') ? actual[i] !== '' : part === actual[i],
+        )
+    );
+}
+
+// The redirect declared for wherever the router is, if there is one. What the
+// map holds is the routes as the app names them, and a location with a
+// parameter in it - '/menu/abc' - never equals one, so it is matched rather
+// than looked up.
+function redirectForLocation(location: string): string | undefined {
+    const declared = redirects?.signedOutRedirects ?? {};
+
+    return (
+        declared[location] ??
+        Object.entries(declared).find(([pattern]) =>
+            matchesPattern(pattern, location),
+        )?.[1]
+    );
+}
+
 // Where a signed-out visitor is sent from a route. Every guarded route has an
 // entry, so a miss here is a bug in the app's declaration.
 function signedOutRedirectFor(path: string) {
-    const fallback = redirects?.signedOutRedirects[path];
+    const fallback = redirectForLocation(path);
 
     if (!fallback) {
         console.error(

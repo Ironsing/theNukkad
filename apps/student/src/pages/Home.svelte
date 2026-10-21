@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { link } from "svelte-spa-router";
     import { fold, outlets, signOut, type Outlet } from "@thenukkad/core";
 
     let rows = $state<Outlet[]>([]);
@@ -57,30 +58,39 @@
         {:else}
             <ul class="flex flex-col gap-3">
                 {#each rows as outlet (outlet.id)}
-                    <li
-                        class="flex items-baseline justify-between gap-4 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3"
-                    >
-                        <span class="flex flex-col">
-                            <span class="text-sm font-medium"
-                                >{outlet.name}</span
-                            >
+                    <li>
+                        <!-- The whole row is the way into the menu. -->
+                        <a
+                            href="/menu/{outlet.id}"
+                            use:link
+                            class="flex items-baseline justify-between gap-4 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3 transition duration-200 hover:border-primary/20 hover:bg-white active:scale-[0.99]"
+                        >
+                            <span class="flex flex-col">
+                                <span class="text-sm font-medium"
+                                    >{outlet.name}</span
+                                >
 
-                            <span class="text-xs text-muted">
-                                <!-- Unset together or set together, so one test
-                                     covers both. -->
-                                {outlet.opensAt && outlet.closesAt
-                                    ? `${clock(outlet.opensAt)} to ${clock(outlet.closesAt)}`
-                                    : "Hours not set"}
+                                <span class="text-xs text-muted">
+                                    <!-- Unset together or set together, so one
+                                         test covers both. -->
+                                    {outlet.opensAt && outlet.closesAt
+                                        ? `${clock(outlet.opensAt)} to ${clock(outlet.closesAt)}`
+                                        : "Hours not set"}
+                                </span>
                             </span>
-                        </span>
 
-                        <!-- Only the exception is marked: everything else is
-                             running to its hours. -->
-                        {#if outlet.status === "closedManually"}
-                            <span class="text-xs font-medium text-red-500">
-                                Closed
-                            </span>
-                        {/if}
+                            <!-- Only the exception is marked: everything else is
+                                 running to its hours. -->
+                            {#if outlet.status === "closedManually"}
+                                <span class="text-xs font-medium text-red-500">
+                                    Closed
+                                </span>
+                            {:else}
+                                <span aria-hidden="true" class="text-muted"
+                                    >→</span
+                                >
+                            {/if}
+                        </a>
                     </li>
                 {/each}
             </ul>

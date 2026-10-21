@@ -4,6 +4,7 @@
     import Login from "./pages/Login.svelte";
     import Signup from "./pages/Signup.svelte";
     import Home from "./pages/Home.svelte";
+    import Menu from "./pages/Menu.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
     import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
@@ -23,6 +24,11 @@
         "/home": wrap({
             component: Home,
             conditions: [requireSignedIn("/home")],
+        }),
+        // One outlet's menu. The page reads the outlet's id from the route.
+        "/menu/:id": wrap({
+            component: Menu,
+            conditions: [requireSignedIn("/menu/:id")],
         }),
     };
 </script>
