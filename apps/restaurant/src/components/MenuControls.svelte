@@ -1,9 +1,12 @@
 <script lang="ts">
     import {
+        dietLabels,
+        diets,
         foldMenuItems,
         menuEditor,
         menuSections,
         rupees,
+        type Diet,
         type MenuItem,
     } from "@thenukkad/core";
 
@@ -19,7 +22,22 @@
     // The item being changed, or null while adding one.
     let editing = $state<string | null>(null);
 
-    let form = $state({ name: "", price: "", category: "" });
+    // A whole draft, as the form holds it: every field of a new item, which is
+    // also everything an edit restates.
+    type Draft = {
+        name: string;
+        price: string;
+        category: string;
+        diet: Diet;
+    };
+
+    // A diet is picked from the three rather than left blank, so an empty form
+    // starts on one - veg, which is what most of this campus's menu is.
+    function emptyForm(): Draft {
+        return { name: "", price: "", category: "", diet: "veg" };
+    }
+
+    let form = $state(emptyForm());
 
     const sections = $derived(menuSections(items));
 
@@ -27,6 +45,16 @@
     // the same section exactly when they are spelled the same way, and a typo
     // is a section of its own.
     const categories = $derived([...new Set(items.map((i) => i.category))]);
+
+    // The marker the three are recognised by: a dot in a square, green for veg,
+    // brown-red for non-veg and yellow for egg. The student app wears the same
+    // three, and they are deliberately not the accent - a menu's veg marker is
+    // not this app's colour.
+    const dietMarks: Record<Diet, string> = {
+        veg: "border-green-600 text-green-600",
+        nonveg: "border-red-600 text-red-600",
+        egg: "border-amber-500 text-amber-500",
+    };
 
     const message = (e: unknown) =>
         e instanceof Error ? e.message : String(e);
@@ -58,7 +86,7 @@
 
     function clearForm() {
         editing = null;
-        form = { name: "", price: "", category: "" };
+        form = emptyForm();
     }
 
     function startEdit(item: MenuItem) {
@@ -69,6 +97,7 @@
             name: item.name,
             price: item.price.toFixed(2),
             category: item.category,
+            diet: item.diet,
         };
     }
 
@@ -84,6 +113,7 @@
                 // the editor's own check says which is which.
                 price: Number(form.price),
                 category: form.category,
+                diet: form.diet,
             };
 
             const saved =
@@ -148,6 +178,17 @@
     // The one button here that takes something away for good.
     const danger =
         "rounded-lg border border-red-500/25 px-3 py-1.5 text-xs text-red-500 transition duration-200 hover:border-red-500/40 active:scale-[0.99] disabled:opacity-40";
+
+    // One of the three in the form: the picked one wears the app's accent, the
+    // others stay quiet, so the row reads as one control.
+    function pickClass(diet: Diet): string {
+        const chosen = "border-accent bg-accent/10";
+        const resting = "border-primary/15 text-muted";
+
+        return `flex cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm transition duration-200 ${
+            form.diet === diet ? chosen : resting
+        }`;
+    }
 </script>
 
 {#if !outletExists}
@@ -199,6 +240,40 @@
             </label>
         </div>
 
+        <!-- Picked from the three rather than typed: unlike the category, there
+             is nothing here for the outlet to spell, and a fourth answer would
+             be a check constraint. The marker travels with the word, since the
+             marker is what a student reads. -->
+        <fieldset class="flex flex-col gap-1.5 text-sm font-medium text-primary/80">
+            <legend>Diet</legend>
+
+            <div class="grid grid-cols-3 gap-2">
+                {#each diets as diet (diet)}
+                    <label class={pickClass(diet)}>
+                        <input
+                            class="sr-only"
+                            type="radio"
+                            name="diet"
+                            value={diet}
+                            bind:group={form.diet}
+                        />
+
+                        <span
+                            class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border {dietMarks[
+                                diet
+                            ]}"
+                            aria-hidden="true"
+                        >
+                            <span class="h-1.5 w-1.5 rounded-full bg-current"
+                            ></span>
+                        </span>
+
+                        {dietLabels[diet]}
+                    </label>
+                {/each}
+            </div>
+        </fieldset>
+
         <!-- The categories already on the menu, so the next item lands in one
              of them instead of in a section of its own. -->
         <datalist id="menu-categories">
@@ -242,11 +317,28 @@
                             class="flex items-center justify-between gap-3 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3"
                         >
                             <span class="flex flex-col">
-                                <span
-                                    class="text-sm font-medium"
-                                    class:text-muted={!item.available}
-                                >
-                                    {item.name}
+                                <span class="flex items-center gap-2">
+                                    <span
+                                        class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border {dietMarks[
+                                            item.diet
+                                        ]}"
+                                        aria-hidden="true"
+                                    >
+                                        <span
+                                            class="h-1.5 w-1.5 rounded-full bg-current"
+                                        ></span>
+                                    </span>
+
+                                    <span class="sr-only">
+                                        {dietLabels[item.diet]}
+                                    </span>
+
+                                    <span
+                                        class="text-sm font-medium"
+                                        class:text-muted={!item.available}
+                                    >
+                                        {item.name}
+                                    </span>
                                 </span>
 
                                 <span class="text-xs text-muted">

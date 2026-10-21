@@ -2,10 +2,12 @@
     import { link } from "svelte-spa-router";
     import {
         MenuReader,
+        dietLabels,
         foldMenuItems,
         menuSections,
         outlets,
         rupees,
+        type Diet,
         type MenuItem,
         type Outlet,
     } from "@thenukkad/core";
@@ -23,6 +25,15 @@
 
     const message = (e: unknown) =>
         e instanceof Error ? e.message : String(e);
+
+    // The marker the three are recognised by: a dot in a square, green for veg,
+    // brown-red for non-veg and yellow for egg. Deliberately not the accent -
+    // this is the menu's own colour language, not this app's.
+    const dietMarks: Record<Diet, string> = {
+        veg: "border-green-600 text-green-600",
+        nonveg: "border-red-600 text-red-600",
+        egg: "border-amber-500 text-amber-500",
+    };
 
     // '19:00' as the app says it.
     function clock(time: string) {
@@ -134,12 +145,29 @@
                             <li
                                 class="flex items-baseline justify-between gap-4 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3"
                             >
-                                <span
-                                    class="text-sm font-medium"
-                                    class:text-muted={!item.available}
-                                    class:line-through={!item.available}
-                                >
-                                    {item.name}
+                                <span class="flex items-center gap-2">
+                                    <span
+                                        class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border {dietMarks[
+                                            item.diet
+                                        ]}"
+                                        aria-hidden="true"
+                                    >
+                                        <span
+                                            class="h-1.5 w-1.5 rounded-full bg-current"
+                                        ></span>
+                                    </span>
+
+                                    <span class="sr-only">
+                                        {dietLabels[item.diet]}
+                                    </span>
+
+                                    <span
+                                        class="text-sm font-medium"
+                                        class:text-muted={!item.available}
+                                        class:line-through={!item.available}
+                                    >
+                                        {item.name}
+                                    </span>
                                 </span>
 
                                 <span class="flex flex-col items-end">
