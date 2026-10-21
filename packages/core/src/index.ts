@@ -11,9 +11,13 @@ export {
 export { MyOutlet, myOutlet, type OutletDraft } from './my_outlet';
 export {
     MenuReader,
+    diets,
+    dietLabels,
     foldMenuItems,
+    isDiet,
     menuSections,
     rupees,
+    type Diet,
     type MenuItem,
     type MenuItemChange,
     type MenuSection,

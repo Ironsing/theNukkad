@@ -1,7 +1,9 @@
 import { supabase } from './supabase';
 import {
+    type Diet,
     type MenuItem,
     type MenuItemRow,
+    isDiet,
     menuItemColumns,
     toMenuItem,
 } from './menu_reader';
@@ -12,6 +14,10 @@ export type NewMenuItem = {
     name: string;
     price: number;
     category: string;
+    // Not optional, and there is no default to fall back on: the outlet says
+    // what it is selling, because a forgotten one that landed on veg would be a
+    // claim about someone's dinner.
+    diet: Diet;
 };
 
 // An edit names only the fields it changes, so that fixing a price does not
@@ -21,6 +27,7 @@ export type MenuItemEdit = Partial<{
     name: string;
     price: number;
     category: string;
+    diet: Diet;
     available: boolean;
 }>;
 
@@ -28,7 +35,7 @@ export type MenuItemEdit = Partial<{
 // row's identity is not a field of a form.
 type WritableColumns = Pick<
     MenuItemRow,
-    'name' | 'price' | 'category' | 'available'
+    'name' | 'price' | 'category' | 'diet' | 'available'
 >;
 
 // The columns' own limits, said in the user's words, so that a form which checks
@@ -68,6 +75,17 @@ function toPrice(price: number): number {
     return Math.round(price * 100) / 100;
 }
 
+// Checked here rather than left to the check constraint: a diet is picked from
+// a list, so one that is none of the three is a mistake worth saying in the
+// user's words.
+function toDiet(diet: Diet): Diet {
+    if (!isDiet(diet)) {
+        throw new Error('A diet has to be veg, nonveg or egg.');
+    }
+
+    return diet;
+}
+
 // A restaurant's own menu: read it, add to it, change it, strike an item off
 // it, and nothing else. Every method here means "my items", because the rows it
 // works with are the account's own - the owner column defaults to the signed-in
@@ -104,6 +122,7 @@ export class MenuEditor {
                 name: toName(draft.name),
                 price: toPrice(draft.price),
                 category: toCategory(draft.category),
+                diet: toDiet(draft.diet),
             })
             .select(menuItemColumns)
             .single()
@@ -131,6 +150,10 @@ export class MenuEditor {
 
         if (edit.category !== undefined) {
             changes.category = toCategory(edit.category);
+        }
+
+        if (edit.diet !== undefined) {
+            changes.diet = toDiet(edit.diet);
         }
 
         if (edit.available !== undefined) {

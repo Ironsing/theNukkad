@@ -1,5 +1,27 @@
 import { supabase } from './supabase';
 
+// The kinds of food a menu is read for, in this country's own three: veg,
+// nonveg, and egg, which is neither. Not free text the way a category is -
+// these are fixed by how the food is made - so the outlet picks one rather than
+// typing one, and there is no fourth to add.
+export const diets = ['veg', 'nonveg', 'egg'] as const;
+
+export type Diet = (typeof diets)[number];
+
+// The three as a page says them. Whether that is a word or the marker that
+// usually carries it is the page's business; this is the spelling.
+export const dietLabels: Record<Diet, string> = {
+    veg: 'Veg',
+    nonveg: 'Non-veg',
+    egg: 'Egg',
+};
+
+// Whether a value is one of them. The check constraint is what makes it so in
+// the database; this is the same question asked of a payload.
+export function isDiet(value: unknown): value is Diet {
+    return diets.some((diet) => diet === value);
+}
+
 // A row of menu_items as a page consumes it. The price is a number of rupees -
 // 49.5 is forty-nine rupees fifty paise - because the app adds it up and shows
 // it, and neither is something a string is good at.
@@ -9,6 +31,9 @@ export type MenuItem = {
     name: string;
     price: number;
     category: string;
+    // Not optional, and not defaulted anywhere: the column refuses a null, and
+    // a row without a diet is one a page cannot show honestly.
+    diet: Diet;
     available: boolean;
 };
 
@@ -33,11 +58,15 @@ export type MenuItemRow = {
     // rupees, once.
     price: string | number;
     category: string;
+    // One of the three, because the check constraint makes it so in the
+    // database. Payloads are still asked (see toChange): a reply that arrived
+    // from somewhere else is checked, not trusted.
+    diet: Diet;
     available: boolean;
 };
 
 export const menuItemColumns =
-    'id, restaurant_id, name, price, category, available';
+    'id, restaurant_id, name, price, category, diet, available';
 
 export function toMenuItem(row: MenuItemRow): MenuItem {
     return {
@@ -46,6 +75,7 @@ export function toMenuItem(row: MenuItemRow): MenuItem {
         name: row.name,
         price: Number(row.price),
         category: row.category,
+        diet: row.diet,
         available: row.available,
     };
 }
@@ -88,7 +118,8 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
         return id === undefined ? null : { kind: 'removed', id };
     }
 
-    const { id, restaurant_id, name, price, category, available } = payload.new;
+    const { id, restaurant_id, name, price, category, diet, available } =
+        payload.new;
 
     // A row missing the columns we show is not a row we can show.
     if (
@@ -97,6 +128,7 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
         name === undefined ||
         price === undefined ||
         category === undefined ||
+        !isDiet(diet) ||
         available === undefined
     ) {
         return null;
@@ -110,6 +142,7 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
             name,
             price,
             category,
+            diet,
             available,
         }),
     };
