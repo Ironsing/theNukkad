@@ -26,8 +26,9 @@ create table public.menu_items (
     -- the categories already in use rather than a blank box.
     category text not null
         check (char_length(btrim(category)) between 1 and 40),
-    -- Sold out, or back on today. This is how an item is retired: nothing can
-    -- delete one, and an outlet that wants it gone sets this false.
+    -- Sold out, or back on today. This is the day-to-day flag rather than the
+    -- way off a menu: an item that is not coming back is removed, which is what
+    -- the delete policy at the end of this file lets its outlet do.
     available boolean not null default true
 );
 
@@ -38,9 +39,10 @@ alter table public.menu_items enable row level security;
 
 -- Local Supabase hands new tables to anon and authenticated by default, so these
 -- grants are not what keeps anyone out - the policies are. They only record what
--- the API is meant to do: read for anyone with a session, no delete for anyone
--- (an item goes when its outlet's info does).
-grant select, insert, update on public.menu_items to authenticated;
+-- the API is meant to do: read for anyone with a session, and a restaurant's
+-- writes on its own items - delete among them, since that is how an item leaves
+-- a menu for good.
+grant select, insert, update, delete on public.menu_items to authenticated;
 
 create policy "Students can read every outlet's menu"
 on public.menu_items
@@ -66,3 +68,14 @@ for update
 to authenticated
 using (public.is_restaurant_account() and restaurant_id = (select auth.uid()))
 with check (public.is_restaurant_account() and restaurant_id = (select auth.uid()));
+
+-- Sold out keeps an item on a menu for the day it is off; this is the one that
+-- takes it off for good. An outlet that has stopped selling something had no way
+-- to say so, and an item flagged false forever leaves a menu nobody can read. It
+-- draws the same boundary the other three do - the outlet's own items - so a
+-- stale id, or one on another outlet's menu, matches nothing and removes nothing.
+create policy "Restaurants can remove from their own menu"
+on public.menu_items
+for delete
+to authenticated
+using (public.is_restaurant_account() and restaurant_id = (select auth.uid()));
