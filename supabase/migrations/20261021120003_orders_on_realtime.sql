@@ -1,0 +1,30 @@
+-- Orders streamed to whoever is looking, so an outlet's incoming list and a
+-- student's waiting order follow the other side's move instead of polling for it.
+--
+-- Same division as the tables before this: the publication decides what Realtime
+-- carries at all, and the policies decide who is sent each row. Nothing extra is
+-- needed for the code: it is minted in the same update that marks the order ready,
+-- so it arrives with it, to both sides at once - which is the whole of "readable
+-- by both the moment it exists", and it is also the notification.
+--
+-- This table does need updates carried, unlike menu_items, where the only change
+-- was a row appearing or going. Realtime checks a policy against the record it
+-- has, and for an update that record is the row as it now is, which is what both
+-- policies are written against. A delete would be the problem - its record is
+-- only a primary key - and no account can delete an order, so the replica
+-- identity stays at the default.
+alter publication supabase_realtime add table public.orders;
+
+-- Measured against the local stack, with four subscriptions open at once: a
+-- plain insert was carried to the student it belonged to and to the outlet it was
+-- addressed to, and to nobody else - which is the policies doing their job on
+-- this path too, since none of the four subscriptions used a filter. An insert
+-- made inside public.create_order() was carried the same way, and the update that
+-- mints a code arrived with the code on it.
+--
+-- The one thing that did not arrive was the first insert after a fresh
+-- subscription, before the replication stream for the table was warm: the update
+-- two seconds later came through, and so did every insert once the stream was up.
+-- So Realtime here carries what happens next rather than what just happened, and
+-- a page has to read the table on mount as well as subscribe - which is what the
+-- menus and the outlet list already do.
