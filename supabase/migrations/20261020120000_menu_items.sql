@@ -26,6 +26,16 @@ create table public.menu_items (
     -- the categories already in use rather than a blank box.
     category text not null
         check (char_length(btrim(category)) between 1 and 40),
+    -- What kind of thing it is, which on this campus is the first thing read off
+    -- a menu: a student looks for it before the price, and the outlet says it as
+    -- it adds the item. Three values fixed by how the food is made - not free
+    -- text the way the category is, and no fourth coming - spelled out as a
+    -- check the way `role` and `status` already are.
+    --
+    -- No default on purpose: a forgotten diet is refused rather than quietly
+    -- calling a chicken roll veg.
+    diet text not null
+        check (diet in ('veg', 'nonveg', 'egg')),
     -- Sold out, or back on today. This is the day-to-day flag rather than the
     -- way off a menu: an item that is not coming back is removed, which is what
     -- the delete policy at the end of this file lets its outlet do.
