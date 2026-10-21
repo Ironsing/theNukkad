@@ -115,11 +115,39 @@
         }
     }
 
+    // An item that is not coming back, which is the one thing in this form a
+    // mistap cannot undo: sold out is the reversible answer, so this asks.
+    async function removeItem(item: MenuItem) {
+        error = "";
+        notice = "";
+
+        if (!window.confirm(`Remove ${item.name} from the menu?`)) {
+            return;
+        }
+
+        try {
+            await menuEditor.remove(item.id);
+            items = foldMenuItems(items, { kind: "removed", id: item.id });
+
+            // The item in the form may be the one that just went.
+            if (editing === item.id) {
+                clearForm();
+            }
+
+            notice = "Removed.";
+        } catch (e) {
+            error = message(e);
+        }
+    }
+
     const label = "flex flex-col gap-1.5 text-sm font-medium text-primary/80";
     const field =
         "rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-accent";
     const quiet =
         "rounded-lg border border-primary/15 px-3 py-1.5 text-xs text-muted transition duration-200 hover:border-primary/25 hover:text-primary active:scale-[0.99] disabled:opacity-40";
+    // The one button here that takes something away for good.
+    const danger =
+        "rounded-lg border border-red-500/25 px-3 py-1.5 text-xs text-red-500 transition duration-200 hover:border-red-500/40 active:scale-[0.99] disabled:opacity-40";
 </script>
 
 {#if !outletExists}
@@ -242,6 +270,17 @@
                                     onclick={() => toggleAvailable(item)}
                                 >
                                     {item.available ? "Sold out" : "Back on"}
+                                </button>
+
+                                <!-- The other two are undoable; this one is
+                                     what an item that is not coming back
+                                     gets. -->
+                                <button
+                                    type="button"
+                                    class={danger}
+                                    onclick={() => removeItem(item)}
+                                >
+                                    Remove
                                 </button>
                             </span>
                         </li>
