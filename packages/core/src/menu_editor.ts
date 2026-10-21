@@ -68,10 +68,10 @@ function toPrice(price: number): number {
     return Math.round(price * 100) / 100;
 }
 
-// A restaurant's own menu: read it, add to it, change it, and nothing else.
-// Every method here means "my items", because the rows it works with are the
-// account's own - the owner column defaults to the signed-in account, and the
-// policies check it either way.
+// A restaurant's own menu: read it, add to it, change it, strike an item off
+// it, and nothing else. Every method here means "my items", because the rows it
+// works with are the account's own - the owner column defaults to the signed-in
+// account, and the policies check it either way.
 export class MenuEditor {
     // The caller's menu, by category and then by name, which is the order the
     // students will see it in. Nothing here names the owner: the select policy
@@ -146,10 +146,35 @@ export class MenuEditor {
         return this.write(id, changes);
     }
 
-    // Sold out, or back on today. This is how an item is retired: there is no
-    // remove(), because no account may delete one.
+    // Sold out, or back on today. Today's dosa is off, tomorrow's is on: the
+    // item stays on the menu.
     async setAvailable(id: string, available: boolean): Promise<MenuItem> {
         return this.update(id, { available });
+    }
+
+    // An item that is not coming back - the supplier stopped, or the outlet
+    // doesn't sell it any more. Each of those is a row an outlet would otherwise
+    // have to flag false forever, which is what leaves a menu nobody can read.
+    //
+    // A delete hands no row back, so this asks for the id the way `write` asks
+    // for the row: a delete that matched nothing - a stale id, or an item on
+    // another outlet's menu, which the policies will not match - throws rather
+    // than reporting a removal that never happened.
+    async remove(id: string): Promise<void> {
+        const { data, error } = await supabase
+            .from('menu_items')
+            .delete()
+            .eq('id', id)
+            .select('id')
+            .returns<{ id: string }[]>();
+
+        if (error) {
+            throw error;
+        }
+
+        if (data.length === 0) {
+            throw new Error('That item is not on your menu.');
+        }
     }
 
     // One update, one stored row back. A write that matched nothing - a stale

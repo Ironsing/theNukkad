@@ -13,11 +13,10 @@ export type MenuItem = {
 };
 
 // A change to one item, in the terms a page folds it into what it is showing.
-// Nothing can delete an item today - no account has a delete policy - so
-// 'removed' describes a payload that cannot arrive yet, kept because a page's
-// folding should not have to change on the day one does. A delete would name a
-// row without describing it: with the default replica identity the old record
-// is the primary key and nothing more.
+// A delete names a row without describing it: Realtime hands a client the
+// primary key and nothing more, whatever the table's replica identity, so
+// 'removed' carries an id. Which is all a page needs - the id is what comes out
+// of its list.
 export type MenuItemChange =
     | { kind: 'saved'; item: MenuItem }
     | { kind: 'removed'; id: string };
@@ -193,11 +192,17 @@ export class MenuReader {
 
     // Live changes to this outlet's menu, and only this outlet's: the filter is
     // applied by the server, so an item put on another outlet's menu never
-    // arrives, and neither does a change to it. RLS decides who may be sent the
-    // rows, exactly as it decides for `list` - except for deletes, which arrive
-    // no matter what the policies say, because a row that is gone cannot be
-    // checked against them. Nothing can delete an item today, so a delete reads
-    // as an id and no more.
+    // arrives, and neither does a change to it. RLS decides who may be sent a
+    // row, exactly as it decides for `list` - except for deletes, which the
+    // policies cannot cover, because a row that is gone cannot be checked
+    // against them. An outlet is told the id of an item on a menu it may not
+    // read. Nothing but the id travels, and an id the list never held folds
+    // away to nothing, so where a delete came from does not matter.
+    //
+    // A delete is filtered against the table's whole old record, which is why
+    // that table carries `replica identity full`: with the default identity a
+    // delete's record is a primary key with no restaurant_id in it, and this
+    // filter drops it on the floor.
     //
     // A sold-out item arrives like any other change: whether the page greys it
     // or drops it is the page's decision, not the database's.
