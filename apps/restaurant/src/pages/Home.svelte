@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { link } from "svelte-spa-router";
     import { myOutlet, signOut, type RestaurantStatus } from "@thenukkad/core";
     import MenuControls from "../components/MenuControls.svelte";
 
@@ -112,6 +113,15 @@
                 Log out
             </button>
         </header>
+
+        <a
+            href="/orders"
+            use:link
+            class="flex items-baseline justify-between gap-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent transition duration-200 hover:border-accent/50 active:scale-[0.99]"
+        >
+            <span>Orders</span>
+            <span aria-hidden="true">→</span>
+        </a>
 
         <div
             role="tablist"

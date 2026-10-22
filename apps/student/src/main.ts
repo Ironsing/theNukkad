@@ -16,6 +16,7 @@ enableRedirectsOnAuthChanges({
     '/': '/login',
     '/home': '/login',
     '/menu/:id': '/login',
+  '/orders': '/login',
     '/reset-password': '/login',
   },
 })

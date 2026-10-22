@@ -3,6 +3,7 @@
     import { wrap } from "svelte-spa-router/wrap";
     import Login from "./pages/Login.svelte";
     import Home from "./pages/Home.svelte";
+    import Orders from "./pages/Orders.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
     import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
@@ -21,6 +22,11 @@
         "/home": wrap({
             component: Home,
             conditions: [requireSignedIn("/home")],
+        }),
+        // What the outlet is here for: orders to cook, and codes to check.
+        "/orders": wrap({
+            component: Orders,
+            conditions: [requireSignedIn("/orders")],
         }),
     };
 </script>

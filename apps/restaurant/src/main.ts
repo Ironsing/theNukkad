@@ -15,6 +15,7 @@ enableRedirectsOnAuthChanges({
   signedOutRedirects: {
     '/': '/login',
     '/home': '/login',
+  '/orders': '/login',
     '/reset-password': '/login',
   },
 })

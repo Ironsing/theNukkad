@@ -49,6 +49,15 @@
             </button>
         </header>
 
+        <a
+            href="/orders"
+            use:link
+            class="flex items-baseline justify-between gap-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent transition duration-200 hover:border-accent/50 active:scale-[0.99]"
+        >
+            <span>Your orders</span>
+            <span aria-hidden="true">→</span>
+        </a>
+
         {#if loading}
             <p class="text-sm text-muted">Loading…</p>
         {:else if rows.length === 0}

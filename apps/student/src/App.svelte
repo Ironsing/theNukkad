@@ -5,6 +5,7 @@
     import Signup from "./pages/Signup.svelte";
     import Home from "./pages/Home.svelte";
     import Menu from "./pages/Menu.svelte";
+    import Orders from "./pages/Orders.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
     import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
@@ -29,6 +30,11 @@
         "/menu/:id": wrap({
             component: Menu,
             conditions: [requireSignedIn("/menu/:id")],
+        }),
+        // The student's own orders, and the code for one of them.
+        "/orders": wrap({
+            component: Orders,
+            conditions: [requireSignedIn("/orders")],
         }),
     };
 </script>
