@@ -10,6 +10,9 @@ export type RestaurantStatus = 'normal' | 'closedManually';
 export type Outlet = {
     id: string;
     name: string;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
     opensAt: string | null;
     closesAt: string | null;
     status: RestaurantStatus;
@@ -27,12 +30,15 @@ export type OutletChange =
 export type OutletRow = {
     id: string;
     name: string;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
     opens_at: string | null;
     closes_at: string | null;
     status: string;
 };
 
-export const outletColumns = 'id, name, opens_at, closes_at, status';
+export const outletColumns = 'id, name, phone, email, address, opens_at, closes_at, status';
 
 // Postgres answers with '08:00:00' and the app shows '08:00'; normalising as
 // rows come out keeps one spelling of a time on this side, whichever way it
@@ -45,6 +51,9 @@ export function toOutlet(row: OutletRow): Outlet {
     return {
         id: row.id,
         name: row.name,
+        phone: row.phone ?? null,
+        email: row.email ?? null,
+        address: row.address ?? null,
         opensAt: toClock(row.opens_at),
         closesAt: toClock(row.closes_at),
         // A cast because the column's check constraint is the vocabulary, and
@@ -70,7 +79,8 @@ function toChange(payload: ChangePayload): OutletChange | null {
         return id === undefined ? null : { kind: 'removed', id };
     }
 
-    const { id, name, opens_at, closes_at, status } = payload.new;
+    const { id, name, phone, email, address, opens_at, closes_at, status } =
+        payload.new;
 
     // A row missing the columns we show is not a row we can show.
     if (id === undefined || name === undefined || status === undefined) {
@@ -82,6 +92,9 @@ function toChange(payload: ChangePayload): OutletChange | null {
         outlet: toOutlet({
             id,
             name,
+            phone: phone ?? null,
+            email: email ?? null,
+            address: address ?? null,
             opens_at: opens_at ?? null,
             closes_at: closes_at ?? null,
             status,
