@@ -1,5 +1,4 @@
 Necessary:
-restaurant contact details and location
 vegan, jain diets, vrat specials, calories
 photos
 mobile oauth
