@@ -7,7 +7,11 @@
     let error = $state("");
 
     const message = (e: unknown) =>
-        e instanceof Error ? e.message : String(e);
+        e instanceof Error
+            ? e.message
+            : typeof e === 'object' && e !== null && 'message' in e
+            ? String((e as { message: unknown }).message)
+            : String(e);
 
     // '19:00' as the app says it.
     function clock(time: string) {
@@ -86,6 +90,19 @@
                                         ? `${clock(outlet.opensAt)} to ${clock(outlet.closesAt)}`
                                         : "Hours not set"}
                                 </span>
+
+                                {#if outlet.phone}
+                                    <button
+                                        type="button"
+                                        onclick={() =>
+                                            (window.location.href = `tel:${outlet.phone}`)}
+                                        class="text-xs text-accent underline hover:opacity-80"
+                                    >{outlet.phone}</button>
+                                {:else if outlet.email}
+                                    <span class="text-xs text-muted">{outlet.email}</span>
+                                {:else if outlet.address}
+                                    <span class="text-xs text-muted">{outlet.address}</span>
+                                {/if}
                             </span>
 
                             <!-- Only the exception is marked: everything else is

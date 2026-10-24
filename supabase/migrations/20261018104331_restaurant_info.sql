@@ -14,8 +14,14 @@ create table public.restaurant_info (
     -- time, and comparing them later needs no parsing. Null together when the
     -- restaurant hasn't said, and closes_at may be earlier than opens_at for a
     -- range that runs past midnight.
-    opens_at time,
-    closes_at time,
+    -- Opening hours are mandatory: both times are set together.
+    opens_at time not null,
+    closes_at time not null,
+    -- Contact details and pickup location. Phone is mandatory; email and
+    -- address are optional.
+    phone text not null,
+    email text,
+    address text,
     -- Whether the outlet is running to its hours ("normal") or has been shut by
     -- hand ("closedManually"). Not derived from the hours above: a manually
     -- closed outlet keeps whatever hours it has.

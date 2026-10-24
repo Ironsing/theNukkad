@@ -197,6 +197,22 @@
                         ? `${clock(outlet.opensAt)} to ${clock(outlet.closesAt)}`
                         : "Hours not set"}
                 </p>
+
+                {#if outlet.phone}
+                    <a
+                        href={`tel:${outlet.phone}`}
+                        class="text-xs text-accent hover:underline"
+                        >Call {outlet.phone}</a
+                    >
+                {:else if outlet.email}
+                    <a
+                        href={`mailto:${outlet.email}`}
+                        class="text-xs text-accent hover:underline"
+                        >{outlet.email}</a
+                    >
+                {:else if outlet.address}
+                    <span class="text-xs text-muted">{outlet.address}</span>
+                {/if}
             {/if}
         </header>
 

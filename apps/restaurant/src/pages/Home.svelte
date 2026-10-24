@@ -8,10 +8,23 @@
 
     let form = $state({
         name: "",
+        phone: "",
+        email: "",
+        address: "",
         opensAt: "",
         closesAt: "",
         status: "normal" as RestaurantStatus,
     });
+
+    // The outlet is "complete" once the mandatory fields are filled: name,
+    // phone number, and opening hours. Only then can the restaurant build its
+    // menu.
+    let outletComplete = $derived(
+        form.name.trim() !== "" &&
+        form.phone.trim() !== "" &&
+        form.opensAt !== "" &&
+        form.closesAt !== ""
+    );
 
     let loading = $state(true);
     let exists = $state(false); // has this outlet ever been saved?
@@ -19,7 +32,11 @@
     let saved = $state("");
 
     const message = (e: unknown) =>
-        e instanceof Error ? e.message : String(e);
+        e instanceof Error
+            ? e.message
+            : typeof e === 'object' && e !== null && 'message' in e
+            ? String((e as { message: unknown }).message)
+            : String(e);
 
     const STEP = 30;
     function shift(time: string, minutes: number) {
@@ -45,6 +62,9 @@
 
                 exists = true;
                 form.name = outlet.name;
+                form.phone = outlet.phone ?? "";
+                form.email = outlet.email ?? "";
+                form.address = outlet.address ?? "";
                 form.opensAt = outlet.opensAt ?? "";
                 form.closesAt = outlet.closesAt ?? "";
                 form.status = outlet.status;
@@ -68,6 +88,9 @@
         try {
             const outlet = await myOutlet.save({
                 name: form.name,
+                phone: form.phone,
+                email: form.email,
+                address: form.address,
                 opensAt: form.opensAt === "" ? null : form.opensAt,
                 closesAt: form.closesAt === "" ? null : form.closesAt,
                 status: form.status,
@@ -144,10 +167,13 @@
                 role="tab"
                 type="button"
                 aria-selected={tab === "menu"}
-                onclick={() => (tab = "menu")}
+                onclick={() =>
+                    outletComplete ? (tab = "menu") : (error = "Set your name, phone number, and opening hours before you can build your menu.")}
                 class="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition duration-200 {tab ===
                 'menu'
-                    ? 'bg-accent/10 text-accent'
+                    ? outletComplete
+                        ? 'bg-accent/10 text-accent'
+                        : 'bg-primary/10 text-primary/40 cursor-not-allowed'
                     : 'text-muted hover:text-primary'}"
             >
                 Menu
@@ -155,7 +181,7 @@
         </div>
 
         {#if tab === "menu"}
-            <MenuControls outletExists={exists} />
+            <MenuControls outletExists={exists && outletComplete} />
         {:else if loading}
             <p class="text-sm text-muted">Loading…</p>
         {:else}
@@ -178,6 +204,49 @@
                     />
                 </label>
 
+                <div class={label}>
+                    <label for="phone">
+                        Phone number <span class="text-xs text-primary/40 font-normal">required</span>
+                    </label>
+                    <input
+                        id="phone"
+                        class={field}
+                        type="tel"
+                        required
+                        maxlength="25"
+                        placeholder="+91 98765 43210"
+                        bind:value={form.phone}
+                    />
+                </div>
+
+                <div class={label}>
+                    <label for="email">
+                        Email address <span class="text-xs text-primary/40 font-normal">optional</span>
+                    </label>
+                    <input
+                        id="email"
+                        class={field}
+                        type="email"
+                        maxlength="254"
+                        placeholder="outlet@example.com"
+                        bind:value={form.email}
+                    />
+                </div>
+
+                <div class={label}>
+                    <label for="address">
+                        Pickup location <span class="text-xs text-primary/40 font-normal">optional</span>
+                    </label>
+                    <textarea
+                        id="address"
+                        class={field}
+                        maxlength="200"
+                        rows="2"
+                        placeholder="e.g. Block C, Ground Floor, Mess Hall"
+                        bind:value={form.address}
+                    ></textarea>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div class={label}>
                         <label for="opensAt">Opens at</label>
@@ -186,6 +255,7 @@
                             id="opensAt"
                             class={field}
                             type="time"
+                            required
                             bind:value={form.opensAt}
                         />
 
@@ -217,6 +287,7 @@
                             id="closesAt"
                             class={field}
                             type="time"
+                            required
                             bind:value={form.closesAt}
                         />
 

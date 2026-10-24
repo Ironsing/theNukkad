@@ -12,6 +12,9 @@ import {
 // left out and a field cleared to null must not mean the same thing.
 export type OutletDraft = {
     name: string;
+    phone: string;
+    email: string;
+    address: string;
     opensAt: string | null;
     closesAt: string | null;
     status: RestaurantStatus;
@@ -54,6 +57,9 @@ export class MyOutlet {
                 {
                     id,
                     name: draft.name.trim(),
+                    phone: draft.phone,
+                    email: draft.email,
+                    address: draft.address,
                     opens_at: draft.opensAt,
                     closes_at: draft.closesAt,
                     status: draft.status,
