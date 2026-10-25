@@ -1,6 +1,5 @@
 ## Necessary
 
-- vegan, jain diets, vrat specials, calories
 - photos
 - preorders
 - overhaul the ui, integrate the branding shubham makes. palette: black orange yellow green
@@ -17,4 +16,5 @@
 - frequently ordered
 - timeline
 - schedule ingestion
+- vrat specials: the calendar, not a diet field
 - mobile auth (needs TRAI/DLT reg, which is not something to handle at the mvp stage)
