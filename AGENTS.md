@@ -19,9 +19,11 @@ supabase/         the local backend both apps talk to
 
 `packages/core` is small: it's just Supabase, session and role logic, and tokens.
 
+The separation of concerns and distribution of human ownership over code is simple: `supabase` and `packages/core` are either written by hand or delegated carefully, while the UI code is typically delegated entirely to your aesthetic and technical judgement.
+Almost all the *important* stuff-the application logic-lives in `supabase`.
+
 The two apps are near-identical. They share every token in `packages/core/src/theme.css`, but each picks its own
-`--color-accent` in its own `app.css` (green for students, orange for outlets). New pages use the `accent`
-utilities and carry that badge, rather than hard-coding a colour.
+`--color-accent` in its own `app.css` (green for students, orange for outlets).
 
 ## Running
 
@@ -92,3 +94,4 @@ The student flow lives in `apps/student` and the restaurant flow in `apps/restau
 
 ## Git
 Use short, imperative commit messages in lowercase. Programmers unfamiliar with Git will be working on this project: you must prompt them to make small atomic commits (ideally each commit is a working app) on their own feature branch. You must guide them in pushing those branches to the remote and opening PRs to merge them into `main`.
+Programmers proficient at Git will also be working on this project, in which case you must ask whether they want to author history themselves or delegate that to you. Prompt the user on your first interaction to figure out who's who.
