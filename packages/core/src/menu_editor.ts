@@ -18,6 +18,12 @@ export type NewMenuItem = {
     // what it is selling, because a forgotten one that landed on veg would be a
     // claim about someone's dinner.
     diet: Diet;
+    // Named rather than defaulted, for the same reason: an outlet saying nothing
+    // about ghee or onion is saying neither is left out. Calories are the one
+    // thing here that may be unsaid, because nobody may have weighed it.
+    vegan: boolean;
+    jain: boolean;
+    calories: number | null;
 };
 
 // An edit names only the fields it changes, so that fixing a price does not
@@ -28,6 +34,11 @@ export type MenuItemEdit = Partial<{
     price: number;
     category: string;
     diet: Diet;
+    vegan: boolean;
+    jain: boolean;
+    // null clears it, undefined leaves it alone: "nobody has weighed this" is a
+    // value an edit can mean, and "don't touch it" is not the same thing.
+    calories: number | null;
     available: boolean;
 }>;
 
@@ -35,7 +46,7 @@ export type MenuItemEdit = Partial<{
 // row's identity is not a field of a form.
 type WritableColumns = Pick<
     MenuItemRow,
-    'name' | 'price' | 'category' | 'diet' | 'available'
+    'name' | 'price' | 'category' | 'diet' | 'vegan' | 'jain' | 'calories' | 'available'
 >;
 
 // The columns' own limits, said in the user's words, so that a form which checks
@@ -86,6 +97,38 @@ function toDiet(diet: Diet): Diet {
     return diet;
 }
 
+// A flag is a claim about a vegetarian item and nothing else, so the pair is
+// refused on anything else in a sentence, rather than as the table's constraint
+// name. Checked here because a form can leave the two set while the diet moves
+// away from veg - which is exactly the state the column refuses.
+function toFlags(diet: Diet, vegan: boolean, jain: boolean): void {
+    if (diet !== 'veg' && (vegan || jain)) {
+        throw new Error('Only a veg item can be vegan or Jain.');
+    }
+}
+
+// Calories as the column holds them: a whole number, or nothing at all. Rounded
+// rather than refused, because a portion is an estimate however carefully it
+// was typed - but not invented: a blank stays null.
+function toCalories(calories: number | null): number | null {
+    if (calories === null) {
+        return null;
+    }
+
+    if (!Number.isFinite(calories) || calories <= 0) {
+        throw new Error('Calories have to be more than zero, or left blank.');
+    }
+
+    const whole = Math.round(calories);
+
+    // The column's own ceiling, said before the constraint says it badly.
+    if (whole > 5000) {
+        throw new Error('That is more calories than a meal can have.');
+    }
+
+    return whole;
+}
+
 // A restaurant's own menu: read it, add to it, change it, strike an item off
 // it, and nothing else. Every method here means "my items", because the rows it
 // works with are the account's own - the owner column defaults to the signed-in
@@ -116,13 +159,20 @@ export class MenuEditor {
     // Returns the stored row rather than the draft: the caller renders what the
     // database holds.
     async add(draft: NewMenuItem): Promise<MenuItem> {
+        const diet = toDiet(draft.diet);
+
+        toFlags(diet, draft.vegan, draft.jain);
+
         const { data, error } = await supabase
             .from('menu_items')
             .insert({
                 name: toName(draft.name),
                 price: toPrice(draft.price),
                 category: toCategory(draft.category),
-                diet: toDiet(draft.diet),
+                diet,
+                vegan: draft.vegan,
+                jain: draft.jain,
+                calories: toCalories(draft.calories),
             })
             .select(menuItemColumns)
             .single()
@@ -155,6 +205,36 @@ export class MenuEditor {
         if (edit.diet !== undefined) {
             changes.diet = toDiet(edit.diet);
         }
+
+        if (edit.vegan !== undefined) {
+            changes.vegan = edit.vegan;
+        }
+
+        if (edit.jain !== undefined) {
+            changes.jain = edit.jain;
+        }
+
+        if (edit.calories !== undefined) {
+            changes.calories = toCalories(edit.calories);
+        }
+
+        // An item that stops being veg cannot keep a claim about what a veg item
+        // leaves out, and clearing is the only consistent answer: an edit that
+        // names the diet need not name the flags, and the row must not be left
+        // in a state the table refuses.
+        if (changes.diet !== undefined && changes.diet !== 'veg') {
+            changes.vegan ??= false;
+            changes.jain ??= false;
+        }
+
+        // Only checkable when this edit is the one naming the diet; a diet the
+        // row already has is the row's business, and the column's check covers
+        // it. Passing veg says nothing either way.
+        toFlags(
+            changes.diet ?? 'veg',
+            changes.vegan ?? false,
+            changes.jain ?? false,
+        );
 
         if (edit.available !== undefined) {
             changes.available = edit.available;

@@ -22,6 +22,26 @@ export function isDiet(value: unknown): value is Diet {
     return diets.some((diet) => diet === value);
 }
 
+// The two flags that refine a veg item rather than compete with the marker: a
+// dish can be veg and vegan, veg and Jain, or veg and neither. Both are claims
+// about a vegetarian item only, which is what the table's checks say too.
+export const dietFlags = ['vegan', 'jain'] as const;
+
+export type DietFlag = (typeof dietFlags)[number];
+
+export const dietFlagLabels: Record<DietFlag, string> = {
+    vegan: 'Vegan',
+    jain: 'Jain',
+};
+
+// What each flag promises, in the outlet's own words. "Jain" alone does not say
+// it - in restaurant practice the word usually means no onion or garlic and
+// nothing more - so a student has to be able to read the claim, not the label.
+export const dietFlagMeanings: Record<DietFlag, string> = {
+    vegan: 'no ghee, dairy, curd or honey',
+    jain: 'no onion, garlic or root vegetables',
+};
+
 // A row of menu_items as a page consumes it. The price is a number of rupees -
 // 49.5 is forty-nine rupees fifty paise - because the app adds it up and shows
 // it, and neither is something a string is good at.
@@ -34,6 +54,13 @@ export type MenuItem = {
     // Not optional, and not defaulted anywhere: the column refuses a null, and
     // a row without a diet is one a page cannot show honestly.
     diet: Diet;
+    // Claims about a veg item: what the kitchen leaves out of it. Read beside
+    // the marker rather than instead of it.
+    vegan: boolean;
+    jain: boolean;
+    // Roughly what one is worth, in kcal, or null because the outlet has not
+    // said. Null is a claim of its own - "nobody weighed this" - and not a zero.
+    calories: number | null;
     available: boolean;
 };
 
@@ -62,11 +89,16 @@ export type MenuItemRow = {
     // database. Payloads are still asked (see toChange): a reply that arrived
     // from somewhere else is checked, not trusted.
     diet: Diet;
+    vegan: boolean;
+    jain: boolean;
+    // A whole number, or nothing. Read the way price is read, so a reply that
+    // spelled it '420' reads the same as one that spelled it 420.
+    calories: string | number | null;
     available: boolean;
 };
 
 export const menuItemColumns =
-    'id, restaurant_id, name, price, category, diet, available';
+    'id, restaurant_id, name, price, category, diet, vegan, jain, calories, available';
 
 export function toMenuItem(row: MenuItemRow): MenuItem {
     return {
@@ -76,6 +108,9 @@ export function toMenuItem(row: MenuItemRow): MenuItem {
         price: Number(row.price),
         category: row.category,
         diet: row.diet,
+        vegan: row.vegan,
+        jain: row.jain,
+        calories: row.calories === null ? null : Number(row.calories),
         available: row.available,
     };
 }
@@ -118,10 +153,22 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
         return id === undefined ? null : { kind: 'removed', id };
     }
 
-    const { id, restaurant_id, name, price, category, diet, available } =
-        payload.new;
+    const {
+        id,
+        restaurant_id,
+        name,
+        price,
+        category,
+        diet,
+        vegan,
+        jain,
+        calories,
+        available,
+    } = payload.new;
 
-    // A row missing the columns we show is not a row we can show.
+    // A row missing the columns we show is not a row we can show. Calories are
+    // absent only when the payload did not carry them: null is a value here,
+    // and the one an outlet that has not weighed the item sends.
     if (
         id === undefined ||
         restaurant_id === undefined ||
@@ -129,6 +176,9 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
         price === undefined ||
         category === undefined ||
         !isDiet(diet) ||
+        vegan === undefined ||
+        jain === undefined ||
+        calories === undefined ||
         available === undefined
     ) {
         return null;
@@ -143,6 +193,9 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
             price,
             category,
             diet,
+            vegan,
+            jain,
+            calories,
             available,
         }),
     };
