@@ -1,5 +1,8 @@
 <script lang="ts">
     import {
+        dietFlagLabels,
+        dietFlagMeanings,
+        dietFlags,
         dietLabels,
         diets,
         foldMenuItems,
@@ -29,15 +32,40 @@
         price: string;
         category: string;
         diet: Diet;
+        // The two claims a veg item can make, and the count. Calories are held as
+        // the field's own text, the way the price is: '' is an outlet that has
+        // not weighed the item.
+        vegan: boolean;
+        jain: boolean;
+        calories: string;
     };
 
     // A diet is picked from the three rather than left blank, so an empty form
-    // starts on one - veg, which is what most of this campus's menu is.
+    // starts on one - veg, which is what most of this campus's menu is - and
+    // neither claim is made till the outlet ticks it.
     function emptyForm(): Draft {
-        return { name: "", price: "", category: "", diet: "veg" };
+        return {
+            name: "",
+            price: "",
+            category: "",
+            diet: "veg",
+            vegan: false,
+            jain: false,
+            calories: "",
+        };
     }
 
     let form = $state(emptyForm());
+
+    // A non-veg item cannot be vegan or Jain, so the two are dropped the moment
+    // the diet stops being veg. The boxes are hidden by then, which is exactly
+    // why a tick nobody can see must not stay in the draft.
+    $effect(() => {
+        if (form.diet !== "veg") {
+            form.vegan = false;
+            form.jain = false;
+        }
+    });
 
     const sections = $derived(menuSections(items));
 
@@ -45,6 +73,19 @@
     // the same section exactly when they are spelled the same way, and a typo
     // is a section of its own.
     const categories = $derived([...new Set(items.map((i) => i.category))]);
+
+    // What a row says under the name: the price, then only the claims this item
+    // actually makes.
+    function summary(item: MenuItem): string {
+        const parts = [rupees(item.price)];
+
+        if (item.vegan) parts.push("vegan");
+        if (item.jain) parts.push("jain");
+        if (item.calories !== null) parts.push(`≈ ${item.calories} kcal`);
+        if (!item.available) parts.push("sold out");
+
+        return parts.join(" · ");
+    }
 
     // The marker the three are recognised by: a dot in a square, green for veg,
     // brown-red for non-veg and yellow for egg. The student app wears the same
@@ -98,6 +139,9 @@
             price: item.price.toFixed(2),
             category: item.category,
             diet: item.diet,
+            vegan: item.vegan,
+            jain: item.jain,
+            calories: item.calories === null ? "" : String(item.calories),
         };
     }
 
@@ -114,6 +158,15 @@
                 price: Number(form.price),
                 category: form.category,
                 diet: form.diet,
+                vegan: form.vegan,
+                jain: form.jain,
+                // Blank is an outlet that has not weighed it, and the column
+                // holds that as nothing at all. Left as text till here, like the
+                // price, so '' and '4o' are not the same thing.
+                calories:
+                    String(form.calories).trim() === ""
+                        ? null
+                        : Number(form.calories),
             };
 
             const saved =
@@ -240,6 +293,26 @@
             </label>
         </div>
 
+        <!-- Optional on purpose: an outlet that has never weighed a portion has
+             nothing to put here, and a guess would be a number a student counts
+             with. -->
+        <label class={label}>
+            Calories (kcal) — optional
+            <input
+                class={field}
+                type="number"
+                min="1"
+                max="5000"
+                step="1"
+                inputmode="numeric"
+                placeholder="420"
+                bind:value={form.calories}
+            />
+            <span class="text-xs font-normal text-muted">
+                Leave blank if nobody has weighed it.
+            </span>
+        </label>
+
         <!-- Picked from the three rather than typed: unlike the category, there
              is nothing here for the outlet to spell, and a fourth answer would
              be a check constraint. The marker travels with the word, since the
@@ -273,6 +346,37 @@
                 {/each}
             </div>
         </fieldset>
+
+        <!-- What the kitchen leaves out of a veg item: two claims beside the
+             marker, never instead of it, which is why they only exist for veg.
+             Each carries what it promises, because "Jain" on its own usually
+             means no onion or garlic and no more. -->
+        {#if form.diet === "veg"}
+            <fieldset class="flex flex-col gap-1.5 text-sm font-medium text-primary/80">
+                <legend>Left out</legend>
+
+                <div class="grid grid-cols-2 gap-2">
+                    {#each dietFlags as flag (flag)}
+                        <label
+                            class="flex cursor-pointer items-start gap-2 rounded-lg border border-primary/15 px-3 py-2.5 transition duration-200 hover:border-primary/25"
+                        >
+                            <input
+                                type="checkbox"
+                                class="mt-0.5 accent-accent"
+                                bind:checked={form[flag]}
+                            />
+
+                            <span class="flex flex-col">
+                                {dietFlagLabels[flag]}
+                                <span class="text-xs font-normal text-muted">
+                                    {dietFlagMeanings[flag]}
+                                </span>
+                            </span>
+                        </label>
+                    {/each}
+                </div>
+            </fieldset>
+        {/if}
 
         <!-- The categories already on the menu, so the next item lands in one
              of them instead of in a section of its own. -->
@@ -342,8 +446,7 @@
                                 </span>
 
                                 <span class="text-xs text-muted">
-                                    {rupees(item.price)}
-                                    {#if !item.available}· sold out{/if}
+                                    {summary(item)}
                                 </span>
                             </span>
 

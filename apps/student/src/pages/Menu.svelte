@@ -2,6 +2,8 @@
     import { link, push } from "svelte-spa-router";
     import {
         MenuReader,
+        dietFlagLabels,
+        dietFlagMeanings,
         dietLabels,
         foldMenuItems,
         menuSections,
@@ -289,6 +291,38 @@
                                         {/if}
                                     </span>
                                 </div>
+
+                                <!-- What the kitchen leaves out, and roughly
+                                     what it is worth - only what the outlet
+                                     actually said. "Jain" is spelled out because
+                                     the word on its own usually means no onion
+                                     or garlic and no more. -->
+                                {#if item.vegan || item.jain || item.calories !== null}
+                                    <p
+                                        class="-mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted"
+                                    >
+                                        {#if item.vegan}
+                                            <span
+                                                title={dietFlagMeanings.vegan}
+                                            >
+                                                {dietFlagLabels.vegan}
+                                            </span>
+                                        {/if}
+
+                                        {#if item.jain}
+                                            <span title={dietFlagMeanings.jain}>
+                                                {dietFlagLabels.jain} · no onion or
+                                                garlic
+                                            </span>
+                                        {/if}
+
+                                        {#if item.calories !== null}
+                                            <span class="tabular-nums">
+                                                ≈ {item.calories} kcal
+                                            </span>
+                                        {/if}
+                                    </p>
+                                {/if}
 
                                 <!-- Only what is on today can be ordered, and
                                      only up to what one order may hold. -->
