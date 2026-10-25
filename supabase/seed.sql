@@ -1,0 +1,1 @@
+-- This exists only because supabase/config.toml references it.

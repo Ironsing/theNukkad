@@ -30,16 +30,40 @@ create table public.menu_items (
     -- a menu: a student looks for it before the price, and the outlet says it as
     -- it adds the item. Three values fixed by how the food is made - not free
     -- text the way the category is, and no fourth coming - spelled out as a
-    -- check the way `role` and `status` already are.
+    -- check the way `role` and `status` already are. Vegan and Jain are not
+    -- fourth and fifth values of it but refinements of one of the three, so
+    -- they are flags below rather than values here.
     --
     -- No default on purpose: a forgotten diet is refused rather than quietly
     -- calling a chicken roll veg.
     diet text not null
         check (diet in ('veg', 'nonveg', 'egg')),
+    -- Two refinements of vegetarian, each ruling out something the veg marker
+    -- allows: `vegan` the animal products it permits - ghee, paneer, curd,
+    -- honey - and `jain` its onion, garlic and root vegetables. Neither is a
+    -- fourth kind of food: a jain paneer tikka and an onion sabzi are both veg,
+    -- so the flags sit beside the marker rather than inside it. Defaulted
+    -- false, which is what an outlet that has not said so means.
+    vegan boolean not null default false,
+    jain boolean not null default false,
+    -- Roughly what one of these is worth to someone counting: a whole number of
+    -- kcal, or nothing at all. Nullable because an outlet that has never
+    -- weighed a portion must not be made to guess, and "unknown" is a different
+    -- claim from a number. A check passes a null and refuses zero and below;
+    -- the ceiling is a typo guard, since 4200 for 420 is the mistake people
+    -- actually make.
+    calories integer
+        check (calories between 1 and 5000),
     -- Sold out, or back on today. This is the day-to-day flag rather than the
     -- way off a menu: an item that is not coming back is removed, which is what
     -- the delete policy at the end of this file lets its outlet do.
-    available boolean not null default true
+    available boolean not null default true,
+    -- A flag is a claim about a vegetarian item and nothing else, so the pair is
+    -- refused on a nonveg or egg dish here rather than left for a page to
+    -- notice. Every other combination is a real one: veg and vegan, veg and
+    -- Jain, veg and both.
+    constraint menu_items_vegan_is_veg check (diet = 'veg' or not vegan),
+    constraint menu_items_jain_is_veg check (diet = 'veg' or not jain)
 );
 
 -- Every read is "the menu of one outlet" and the foreign key needs it too.
