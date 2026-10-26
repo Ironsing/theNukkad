@@ -114,13 +114,6 @@ export function orderTotal(order: Order): number {
     return order.lines.reduce((total, line) => total + lineTotal(line), 0);
 }
 
-// Whether a value could be a code at all: four digits, none of them a leading
-// zero. The column's own check is the same one, said here so a counter can be
-// told a typo is a typo without a round trip.
-export function isCode(value: string): boolean {
-    return /^[1-9][0-9]{3}$/.test(value);
-}
-
 // The columns' own limits, said in the user's words, so that a form which checks
 // them spares the user a constraint name.
 const longestNotes = 200;

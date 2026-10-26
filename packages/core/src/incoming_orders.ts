@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
+import { isCode } from './otp';
 import {
-    isCode,
     orderColumns,
     otpFor,
     toOrder,

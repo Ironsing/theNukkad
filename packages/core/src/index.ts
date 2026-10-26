@@ -35,7 +35,6 @@ export {
 export {
     MyOrders,
     myOrders,
-    isCode,
     lineTotal,
     orderTotal,
     type NewOrder,
@@ -43,5 +42,24 @@ export {
     type Order,
     type OrderLine,
 } from './my_orders';
+// The one thing the two pools share: what a code looks like, whichever table it was
+// minted into. Out here rather than inside either pool's exports, because the counter
+// asks it about a code it has not looked up yet and does not know the kind of.
+export { isCode } from './otp';
 export { IncomingOrders, incomingOrders } from './incoming_orders';
+export {
+    MyPreorders,
+    myPreorders,
+    isPreorderStatus,
+    preorderStatuses,
+    preorderStatusLabels,
+    preorderTotal,
+    type NewPreorder,
+    type NewPreorderLine,
+    type Preorder,
+    type PreorderLine,
+    type PreorderStatus,
+} from './my_preorders';
+export { IncomingPreorders, incomingPreorders } from './incoming_preorders';
+export { findTicketByCode, type Ticket } from './tickets';
 export { supabase } from './supabase';
