@@ -62,6 +62,15 @@
             <span aria-hidden="true">→</span>
         </a>
 
+        <a
+            href="/preorders"
+            use:link
+            class="flex items-baseline justify-between gap-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent transition duration-200 hover:border-accent/50 active:scale-[0.99]"
+        >
+            <span>Your preorders</span>
+            <span aria-hidden="true">→</span>
+        </a>
+
         {#if loading}
             <p class="text-sm text-muted">Loading…</p>
         {:else if rows.length === 0}
@@ -71,7 +80,7 @@
         {:else}
             <ul class="flex flex-col gap-3">
                 {#each rows as outlet (outlet.id)}
-                    <li>
+                    <li class="flex flex-col gap-2">
                         <!-- The whole row is the way into the menu. -->
                         <a
                             href="/menu/{outlet.id}"
@@ -116,6 +125,16 @@
                                     >→</span
                                 >
                             {/if}
+                        </a>
+
+                        <!-- Beside the row rather than inside it: one link is
+                             the menu, this is the same menu asked for later. -->
+                        <a
+                            href="/preorder/{outlet.id}"
+                            use:link
+                            class="self-start text-xs text-muted transition duration-200 hover:text-primary"
+                        >
+                            Preorder for later →
                         </a>
                     </li>
                 {/each}

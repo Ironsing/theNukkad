@@ -6,6 +6,8 @@
     import Home from "./pages/Home.svelte";
     import Menu from "./pages/Menu.svelte";
     import Orders from "./pages/Orders.svelte";
+    import Preorder from "./pages/Preorder.svelte";
+    import Preorders from "./pages/Preorders.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
     import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
@@ -35,6 +37,17 @@
         "/orders": wrap({
             component: Orders,
             conditions: [requireSignedIn("/orders")],
+        }),
+        // Asking an outlet for something for later. The page reads the outlet's
+        // id from the route, as the menu does, and asks the same menu for it.
+        "/preorder/:id": wrap({
+            component: Preorder,
+            conditions: [requireSignedIn("/preorder/:id")],
+        }),
+        // What was asked for, and the code for the ones that are ready.
+        "/preorders": wrap({
+            component: Preorders,
+            conditions: [requireSignedIn("/preorders")],
         }),
     };
 </script>

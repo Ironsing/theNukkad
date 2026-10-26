@@ -4,6 +4,7 @@
     import Login from "./pages/Login.svelte";
     import Home from "./pages/Home.svelte";
     import Orders from "./pages/Orders.svelte";
+    import Preorders from "./pages/Preorders.svelte";
     import ResetPassword from "./pages/ResetPassword.svelte";
     import { redirectSignedInTo, requireSignedIn } from "@thenukkad/core";
 
@@ -27,6 +28,12 @@
         "/orders": wrap({
             component: Orders,
             conditions: [requireSignedIn("/orders")],
+        }),
+        // What it has been asked for in advance: answer, cook, and the codes
+        // those bring.
+        "/preorders": wrap({
+            component: Preorders,
+            conditions: [requireSignedIn("/preorders")],
         }),
     };
 </script>

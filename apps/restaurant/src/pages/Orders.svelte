@@ -1,6 +1,7 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
     import {
+        findTicketByCode,
         incomingOrders,
         isCode,
         lineTotal,
@@ -116,20 +117,29 @@
         checking = true;
 
         try {
-            const order = await incomingOrders.findByCode(code);
+            // Both pools at once, through findTicketByCode: a code is unique to
+            // this outlet for a day within its own table and not across the two,
+            // so asking about orders alone would find nothing while a student
+            // stood there holding a preorder's code.
+            const ticket = await findTicketByCode(code);
 
-            if (order === null) {
-                checked = `No order here has the code ${code}.`;
+            if (ticket === null) {
+                checked = `No ticket here has the code ${code}.`;
                 return;
             }
 
-            foundId = order.id;
+            if (ticket.kind === "preorder") {
+                checked = `Code ${code} is a preorder, not an order - it is on the Preorders screen.`;
+                return;
+            }
+
+            foundId = ticket.order.id;
             checked = `Code ${code} is the order below.`;
 
             // It may not be in the list yet: an order placed since this screen
             // last read, or one cooked on another till.
-            if (!orders.some((o) => o.id === order.id)) {
-                orders = [order, ...orders];
+            if (!orders.some((o) => o.id === ticket.order.id)) {
+                orders = [ticket.order, ...orders];
             }
         } catch (e) {
             error = message(e);

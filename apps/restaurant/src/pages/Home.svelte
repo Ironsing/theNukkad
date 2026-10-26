@@ -146,6 +146,15 @@
             <span aria-hidden="true">→</span>
         </a>
 
+        <a
+            href="/preorders"
+            use:link
+            class="flex items-baseline justify-between gap-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent transition duration-200 hover:border-accent/50 active:scale-[0.99]"
+        >
+            <span>Preorders</span>
+            <span aria-hidden="true">→</span>
+        </a>
+
         <div
             role="tablist"
             class="flex gap-1 rounded-xl border border-primary/[0.07] bg-white/60 p-1"
