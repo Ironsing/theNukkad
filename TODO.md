@@ -1,6 +1,5 @@
 ## Necessary
 
-- photos
 - overhaul the ui, integrate the branding shubham makes. palette: black orange yellow green
 - dark mode
 - web app version and domain
