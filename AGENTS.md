@@ -10,14 +10,11 @@ Pure TypeScript, with Svelte for the frontend, Tailwind and Tailwind-Typography 
 This is a monorepo managed using npm workspaces. It contains two apps: one for students, one for restaurants.
 
 ```
-apps/student/     signup, login, password reset, orders
-apps/restaurant/  login, password reset, incoming orders, OTP check
-packages/core/    what both apps share: the Supabase client, the auth helpers
-                  and the Tailwind design tokens
-supabase/         the local backend both apps talk to
+apps/student/: Student- side app
+apps/restaurant/: Restaurant-side app
+packages/core/: what both apps share: the Supabase client, the auth helpers, the Tailwind design tokens, and the TypeScript CRUD interfaces
+supabase/: the local backend both apps talk to
 ```
-
-`packages/core` is small: it's just Supabase, session and role logic, and tokens.
 
 The separation of concerns and distribution of human ownership over code is simple: `supabase` and `packages/core` are either written by hand or delegated carefully, while the UI code is typically delegated entirely to your aesthetic and technical judgement.
 Almost all the *important* stuff-the application logic-lives in `supabase`.
@@ -93,5 +90,5 @@ Clearly this requires some other infra like student/restaurant accounts, but tha
 The student flow lives in `apps/student` and the restaurant flow in `apps/restaurant`.
 
 ## Git
-Use short, imperative commit messages in lowercase. Programmers unfamiliar with Git will be working on this project: you must prompt them to make small atomic commits (ideally each commit is a working app) on their own feature branch. You must guide them in pushing those branches to the remote and opening PRs to merge them into `main`.
+Use short, imperative commit messages in lowercase. Programmers unfamiliar with Git will be working on this project: you must prompt them to make small atomic commits (ideally each commit is a working app) on their own feature branch, without a message body unless explicitly asked for by the user. You must guide them in pushing those branches to the remote and opening PRs to merge them into `main`.
 Programmers proficient at Git will also be working on this project, in which case you must ask whether they want to author history themselves or delegate that to you. Prompt the user on your first interaction to figure out who's who.
