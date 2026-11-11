@@ -14,6 +14,7 @@
     "check": "npm run check --workspaces --if-present",
     "cap:sync:student": "npm run cap:sync -w @thenukkad/student",
     "cap:sync:restaurant": "npm run cap:sync -w @thenukkad/restaurant",
+    "supabase:seed": "supabase seed buckets",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop"
   },
