@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { currentUserId } from './auth';
+import { writeLogo } from './photos';
 import {
     type Outlet,
     type OutletRow,
@@ -75,6 +76,10 @@ export class MyOutlet {
         }
 
         return toOutlet(data);
+    }
+
+    async saveLogo(photo: Blob): Promise<string> {
+        return await writeLogo(await currentUserId(), photo);
     }
 }
 

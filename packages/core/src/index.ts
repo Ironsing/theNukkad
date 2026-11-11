@@ -32,6 +32,7 @@ export {
     type NewMenuItem,
     type MenuItemEdit,
 } from './menu_editor';
+export { logoUrl, menuItemPhotoUrl } from './photos';
 export {
     MyOrders,
     myOrders,

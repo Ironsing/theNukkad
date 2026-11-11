@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { menuItemPhotoUrl } from './photos';
 
 // The kinds of food a menu is read for, in this country's own three: veg,
 // nonveg, and egg, which is neither. Not free text the way a category is -
@@ -62,6 +63,8 @@ export type MenuItem = {
     // said. Null is a claim of its own - "nobody weighed this" - and not a zero.
     calories: number | null;
     available: boolean;
+    // Named whether or not a picture is there.
+    photo: string;
 };
 
 // A change to one item, in the terms a page folds it into what it is showing.
@@ -112,6 +115,8 @@ export function toMenuItem(row: MenuItemRow): MenuItem {
         jain: row.jain,
         calories: row.calories === null ? null : Number(row.calories),
         available: row.available,
+        // Built, not stored.
+        photo: menuItemPhotoUrl(row.restaurant_id, row.id),
     };
 }
 

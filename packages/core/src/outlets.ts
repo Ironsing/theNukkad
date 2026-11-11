@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logoUrl } from './photos';
 
 // The two states an outlet can be in. 'normal' means it is running to its hours;
 // 'closedManually' means someone shut it by hand. Not derivable from the hours:
@@ -16,6 +17,8 @@ export type Outlet = {
     opensAt: string | null;
     closesAt: string | null;
     status: RestaurantStatus;
+    // Named whether or not a picture is there.
+    logo: string;
 };
 
 // A change to one outlet, in the terms a page folds it into what it is showing.
@@ -59,6 +62,8 @@ export function toOutlet(row: OutletRow): Outlet {
         // A cast because the column's check constraint is the vocabulary, and
         // this is only telling TypeScript what Postgres already guarantees.
         status: row.status as RestaurantStatus,
+        // Built, not stored
+        logo: logoUrl(row.id),
     };
 }
 

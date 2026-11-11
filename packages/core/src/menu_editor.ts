@@ -1,4 +1,6 @@
 import { supabase } from './supabase';
+import { currentUserId } from './auth';
+import { writeItemPhoto } from './photos';
 import {
     type Diet,
     type MenuItem,
@@ -253,6 +255,10 @@ export class MenuEditor {
     // item stays on the menu.
     async setAvailable(id: string, available: boolean): Promise<MenuItem> {
         return this.update(id, { available });
+    }
+
+    async savePhoto(id: string, photo: Blob): Promise<string> {
+        return await writeItemPhoto(await currentUserId(), id, photo);
     }
 
     // An item that is not coming back - the supplier stopped, or the outlet
