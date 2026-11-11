@@ -12,6 +12,7 @@
         type Diet,
         type MenuItem,
     } from "@thenukkad/core";
+    import Photo from "./Photo.svelte";
 
     // An item hangs off the outlet's row, so there is nothing to add to until
     // that row is saved. The page knows whether it is.
@@ -21,6 +22,11 @@
     let loading = $state(true);
     let error = $state("");
     let notice = $state("");
+
+    // A saved picture does not change the item, so its row's picture is
+    // re-mounted rather than re-folded, and a row at work says so.
+    let photoVersion = $state<Record<string, number>>({});
+    let uploading = $state<string | null>(null);
 
     // The item being changed, or null while adding one.
     let editing = $state<string | null>(null);
@@ -223,6 +229,37 @@
         }
     }
 
+    // An outlet choosing a picture for its own dish, from whatever a phone
+    // camera or a download gave it. The file is the one thing in this component
+    // that can be a fault worth saying out loud; a dish still without one never
+    // is.
+    async function uploadPhoto(item: MenuItem, event: Event) {
+        const input = event.currentTarget as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+
+        // Backing out of the picker is not a mistake.
+        if (file === null) return;
+
+        error = "";
+        notice = "";
+        uploading = item.id;
+
+        try {
+            await menuEditor.savePhoto(item.id, file);
+            photoVersion = {
+                ...photoVersion,
+                [item.id]: (photoVersion[item.id] ?? 0) + 1,
+            };
+            notice = "Photo saved.";
+        } catch (e) {
+            error = message(e);
+        } finally {
+            uploading = null;
+            // The same file picked again is the same change again.
+            input.value = "";
+        }
+    }
+
     const label = "flex flex-col gap-1.5 text-sm font-medium text-primary/80";
     const field =
         "rounded-lg border border-primary/15 bg-paper/60 px-4 py-3 text-sm text-primary outline-none transition duration-200 placeholder:text-primary/35 hover:border-primary/25 focus:border-accent";
@@ -418,9 +455,18 @@
                 <ul class="flex flex-col gap-2">
                     {#each section.items as item (item.id)}
                         <li
-                            class="flex items-center justify-between gap-3 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3"
+                            class="flex items-center gap-3 rounded-xl border border-primary/[0.07] bg-white/60 px-3 py-3"
                         >
-                            <span class="flex flex-col">
+                            {#key (photoVersion[item.id] ?? 0)}
+                                <Photo
+                                    src={item.photo}
+                                    alt={item.name}
+                                    fallback="blank"
+                                    class="h-12 w-12 shrink-0 rounded-xl bg-primary/[0.05] object-cover"
+                                />
+                            {/key}
+
+                            <span class="flex min-w-0 flex-1 flex-col">
                                 <span class="flex items-center gap-2">
                                     <span
                                         class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border {dietMarks[
@@ -450,7 +496,19 @@
                                 </span>
                             </span>
 
-                            <span class="flex gap-2">
+                            <span class="flex flex-wrap justify-end gap-2">
+                                <label class="{quiet} cursor-pointer">
+                                    {uploading === item.id ? "Saving…" : "Photo"}
+                                    <input
+                                        class="sr-only"
+                                        type="file"
+                                        accept="image/*"
+                                        disabled={uploading !== null}
+                                        onchange={(event) =>
+                                            uploadPhoto(item, event)}
+                                    />
+                                </label>
+
                                 <button
                                     type="button"
                                     class={quiet}

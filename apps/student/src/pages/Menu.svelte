@@ -14,6 +14,7 @@
         type MenuItem,
         type Outlet,
     } from "@thenukkad/core";
+    import Photo from "../components/Photo.svelte";
 
     // The router hands a page its URL parameters.
     let { params }: { params: { id: string } } = $props();
@@ -246,120 +247,132 @@
                     <ul class="flex flex-col gap-2">
                         {#each section.items as item (item.id)}
                             <li
-                                class="flex flex-col gap-3 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3"
+                                class="flex gap-3 rounded-xl border border-primary/[0.07] bg-white/60 px-3 py-3"
                             >
-                                <div
-                                    class="flex items-baseline justify-between gap-4"
-                                >
-                                    <span class="flex items-center gap-2">
-                                        <span
-                                            class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border {dietMarks[
-                                                item.diet
-                                            ]}"
-                                            aria-hidden="true"
-                                        >
-                                            <span
-                                                class="h-1.5 w-1.5 rounded-full bg-current"
-                                            ></span>
-                                        </span>
+                                <!-- A dish with no picture keeps its place with
+                                     an empty box: most of a real menu has no
+                                     photo, and none of them are a fault. -->
+                                <Photo
+                                    src={item.photo}
+                                    alt={item.name}
+                                    fallback="blank"
+                                    class="h-14 w-14 shrink-0 rounded-xl bg-primary/[0.05] object-cover"
+                                />
 
-                                        <span class="sr-only">
-                                            {dietLabels[item.diet]}
-                                        </span>
-
-                                        <span
-                                            class="text-sm font-medium"
-                                            class:text-muted={!item.available}
-                                            class:line-through={!item.available}
-                                        >
-                                            {item.name}
-                                        </span>
-                                    </span>
-
-                                    <span class="flex flex-col items-end">
-                                        <span
-                                            class="text-sm tabular-nums"
-                                            class:text-muted={!item.available}
-                                        >
-                                            {rupees(item.price)}
-                                        </span>
-
-                                        {#if !item.available}
-                                            <span class="text-xs text-red-500">
-                                                Sold out
-                                            </span>
-                                        {/if}
-                                    </span>
-                                </div>
-
-                                <!-- What the kitchen leaves out, and roughly
-                                     what it is worth - only what the outlet
-                                     actually said. "Jain" is spelled out because
-                                     the word on its own usually means no onion
-                                     or garlic and no more. -->
-                                {#if item.vegan || item.jain || item.calories !== null}
-                                    <p
-                                        class="-mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted"
-                                    >
-                                        {#if item.vegan}
-                                            <span
-                                                title={dietFlagMeanings.vegan}
-                                            >
-                                                {dietFlagLabels.vegan}
-                                            </span>
-                                        {/if}
-
-                                        {#if item.jain}
-                                            <span title={dietFlagMeanings.jain}>
-                                                {dietFlagLabels.jain} · no onion or
-                                                garlic
-                                            </span>
-                                        {/if}
-
-                                        {#if item.calories !== null}
-                                            <span class="tabular-nums">
-                                                ≈ {item.calories} kcal
-                                            </span>
-                                        {/if}
-                                    </p>
-                                {/if}
-
-                                <!-- Only what is on today can be ordered, and
-                                     only up to what one order may hold. -->
-                                {#if item.available}
+                                <div class="flex min-w-0 flex-1 flex-col gap-3">
                                     <div
-                                        class="flex items-center justify-end gap-2"
+                                        class="flex items-baseline justify-between gap-4"
                                     >
-                                        {#if (cart[item.id] ?? 0) > 0}
+                                        <span class="flex items-center gap-2">
+                                            <span
+                                                class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border {dietMarks[
+                                                    item.diet
+                                                ]}"
+                                                aria-hidden="true"
+                                            >
+                                                <span
+                                                    class="h-1.5 w-1.5 rounded-full bg-current"
+                                                ></span>
+                                            </span>
+
+                                            <span class="sr-only">
+                                                {dietLabels[item.diet]}
+                                            </span>
+
+                                            <span
+                                                class="text-sm font-medium"
+                                                class:text-muted={!item.available}
+                                                class:line-through={!item.available}
+                                            >
+                                                {item.name}
+                                            </span>
+                                        </span>
+
+                                        <span class="flex flex-col items-end">
+                                            <span
+                                                class="text-sm tabular-nums"
+                                                class:text-muted={!item.available}
+                                            >
+                                                {rupees(item.price)}
+                                            </span>
+
+                                            {#if !item.available}
+                                                <span class="text-xs text-red-500">
+                                                    Sold out
+                                                </span>
+                                            {/if}
+                                        </span>
+                                    </div>
+
+                                    <!-- What the kitchen leaves out, and roughly
+                                         what it is worth - only what the outlet
+                                         actually said. "Jain" is spelled out because
+                                         the word on its own usually means no onion
+                                         or garlic and no more. -->
+                                    {#if item.vegan || item.jain || item.calories !== null}
+                                        <p
+                                            class="-mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted"
+                                        >
+                                            {#if item.vegan}
+                                                <span
+                                                    title={dietFlagMeanings.vegan}
+                                                >
+                                                    {dietFlagLabels.vegan}
+                                                </span>
+                                            {/if}
+
+                                            {#if item.jain}
+                                                <span title={dietFlagMeanings.jain}>
+                                                    {dietFlagLabels.jain} · no onion or
+                                                    garlic
+                                                </span>
+                                            {/if}
+
+                                            {#if item.calories !== null}
+                                                <span class="tabular-nums">
+                                                    ≈ {item.calories} kcal
+                                                </span>
+                                            {/if}
+                                        </p>
+                                    {/if}
+
+                                    <!-- Only what is on today can be ordered, and
+                                         only up to what one order may hold. -->
+                                    {#if item.available}
+                                        <div
+                                            class="flex items-center justify-end gap-2"
+                                        >
+                                            {#if (cart[item.id] ?? 0) > 0}
+                                                <button
+                                                    type="button"
+                                                    class={step}
+                                                    onclick={() =>
+                                                        addToCart(item, -1)}
+                                                    aria-label="One {item.name} fewer"
+                                                >
+                                                    −
+                                                </button>
+
+                                                <span
+                                                    class="w-6 text-center text-sm tabular-nums"
+                                                >
+                                                    {cart[item.id]}
+                                                </span>
+                                            {/if}
+
                                             <button
                                                 type="button"
                                                 class={step}
-                                                onclick={() =>
-                                                    addToCart(item, -1)}
-                                                aria-label="One {item.name} fewer"
+                                                onclick={() => addToCart(item, 1)}
+                                                aria-label="One {item.name} more"
                                             >
-                                                −
+                                                {(cart[item.id] ?? 0) > 0
+                                                    ? "+"
+                                                    : "Add"}
                                             </button>
-
-                                            <span
-                                                class="w-6 text-center text-sm tabular-nums"
-                                            >
-                                                {cart[item.id]}
-                                            </span>
-                                        {/if}
-
-                                        <button
-                                            type="button"
-                                            class={step}
-                                            onclick={() => addToCart(item, 1)}
-                                            aria-label="One {item.name} more"
-                                        >
-                                            {(cart[item.id] ?? 0) > 0
-                                                ? "+"
-                                                : "Add"}
-                                        </button>
-                                    </div>
-                                {/if}
+                                        </div>
+                                    {/if}
+                                </div>
                             </li>
                         {/each}
                     </ul>

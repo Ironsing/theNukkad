@@ -1,6 +1,7 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
     import { fold, outlets, signOut, type Outlet } from "@thenukkad/core";
+    import Photo from "../components/Photo.svelte";
 
     let rows = $state<Outlet[]>([]);
     let loading = $state(true);
@@ -85,9 +86,18 @@
                         <a
                             href="/menu/{outlet.id}"
                             use:link
-                            class="flex items-baseline justify-between gap-4 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3 transition duration-200 hover:border-primary/20 hover:bg-white active:scale-[0.99]"
+                            class="flex items-center gap-3 rounded-xl border border-primary/[0.07] bg-white/60 px-4 py-3 transition duration-200 hover:border-primary/20 hover:bg-white active:scale-[0.99]"
                         >
-                            <span class="flex flex-col">
+                            <!-- An outlet that has not uploaded anything is not
+                                 in any way wrong, so it wears its own letter
+                                 instead of a broken picture. -->
+                            <Photo
+                                src={outlet.logo}
+                                alt={outlet.name}
+                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 object-cover text-base font-medium text-accent"
+                            />
+
+                            <span class="flex min-w-0 flex-1 flex-col">
                                 <span class="text-sm font-medium"
                                     >{outlet.name}</span
                                 >

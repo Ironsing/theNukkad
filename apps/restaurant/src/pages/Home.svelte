@@ -2,6 +2,7 @@
     import { link } from "svelte-spa-router";
     import { myOutlet, signOut, type RestaurantStatus } from "@thenukkad/core";
     import MenuControls from "../components/MenuControls.svelte";
+    import Photo from "../components/Photo.svelte";
 
     // Two sides of the same outlet: what it is, and what it sells.
     let tab = $state<"outlet" | "menu">("outlet");
@@ -30,6 +31,15 @@
     let exists = $state(false); // has this outlet ever been saved?
     let error = $state("");
     let saved = $state("");
+
+    // The logo is its own write rather than a field of the form: a picture is not
+    // a detail of the outlet, and Save is about the details. Bumped on every
+    // save, because the picture's path never changes and the box showing it has
+    // to be re-mounted to ask for it again.
+    let logo = $state("");
+    let logoVersion = $state(0);
+    let logoError = $state("");
+    let uploadingLogo = $state(false);
 
     const message = (e: unknown) =>
         e instanceof Error
@@ -68,6 +78,7 @@
                 form.opensAt = outlet.opensAt ?? "";
                 form.closesAt = outlet.closesAt ?? "";
                 form.status = outlet.status;
+                logo = outlet.logo;
             })
             .catch((e) => (error = message(e)))
             .finally(() => (loading = false));
@@ -103,6 +114,30 @@
             saved = "Saved.";
         } catch (e) {
             error = message(e);
+        }
+    }
+
+    // A picture the outlet chose, which is the one thing on this screen that can
+    // fail for a reason worth saying: the file itself.
+    async function uploadLogo(event: Event) {
+        const input = event.currentTarget as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+
+        // Backing out of the picker is not a mistake.
+        if (file === null) return;
+
+        logoError = "";
+        uploadingLogo = true;
+
+        try {
+            logo = await myOutlet.saveLogo(file);
+            logoVersion += 1;
+        } catch (e) {
+            logoError = message(e);
+        } finally {
+            uploadingLogo = false;
+            // The same file picked again is the same change again.
+            input.value = "";
         }
     }
 
@@ -199,6 +234,46 @@
                     ? "Students can see this outlet."
                     : "Not set up yet. Saving puts you on the student list."}
             </p>
+
+            {#if exists}
+                <div class="flex items-center gap-4">
+                    {#key logoVersion}
+                        <Photo
+                            src={logo}
+                            alt={form.name.trim() === ""
+                                ? "Your outlet"
+                                : form.name}
+                            class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/10 object-cover text-lg font-medium text-accent"
+                        />
+                    {/key}
+
+                    <div class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-primary/80">
+                            Logo
+                            <span class="text-xs font-normal text-primary/40"
+                                >optional</span
+                            >
+                        </span>
+
+                        <label
+                            class="w-fit cursor-pointer rounded-lg border border-primary/15 px-3 py-2 text-xs text-muted transition duration-200 hover:border-primary/25 hover:text-primary"
+                        >
+                            {uploadingLogo ? "Saving…" : "Choose a photo"}
+                            <input
+                                class="sr-only"
+                                type="file"
+                                accept="image/*"
+                                disabled={uploadingLogo}
+                                onchange={uploadLogo}
+                            />
+                        </label>
+
+                        {#if logoError}
+                            <p class="text-xs text-red-500">{logoError}</p>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
 
             <form class="flex flex-col gap-5" onsubmit={handleSubmit}>
                 <label class={label}>
