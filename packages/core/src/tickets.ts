@@ -22,7 +22,7 @@ function cookedAt(at: string | null): number {
 
 // The ticket a code belongs to, or null when it belongs to none.
 //
-// Both pools are asked, because a code is unique to its outlet for a day within its
+// Both pools are asked, because a code is unique to its restaurant for a day within its
 // own table and not across the two: the same four digits can be live on an order and
 // on a request at once, and a counter that asked one table would quietly find nothing
 // while a student stood there holding the other one. Each lookup is a single indexed

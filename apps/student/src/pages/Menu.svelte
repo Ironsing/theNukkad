@@ -8,18 +8,18 @@
         foldMenuItems,
         menuSections,
         myOrders,
-        outlets,
+        restaurants,
         rupees,
         type Diet,
         type MenuItem,
-        type Outlet,
+        type Restaurant,
     } from "@thenukkad/core";
     import Photo from "../components/Photo.svelte";
 
     // The router hands a page its URL parameters.
     let { params }: { params: { id: string } } = $props();
 
-    let outlet = $state<Outlet | null>(null);
+    let outlet = $state<Restaurant | null>(null);
     let items = $state<MenuItem[]>([]);
     let loading = $state(true);
     let error = $state("");
@@ -120,7 +120,7 @@
             // also the only thing left to say to someone who has just ordered.
             push("/orders");
         } catch (e) {
-            // The refusals are sentences - the outlet has closed for now, one of
+            // The refusals are sentences - the restaurant has closed for now, one of
             // those items is sold out, only one order a minute - so the bar
             // shows the one it is given.
             placeError = message(e);
@@ -145,7 +145,7 @@
         placeError = "";
         loading = true;
 
-        outlets
+        restaurants
             .get(id)
             .then((found) => {
                 if (live) outlet = found;
@@ -184,7 +184,7 @@
             use:link
             class="inline-flex items-center gap-1.5 self-start text-sm text-muted transition hover:text-primary"
         >
-            <span aria-hidden="true">←</span> Outlets
+            <span aria-hidden="true">←</span> Restaurants
         </a>
 
         <header class="flex flex-col gap-1">
@@ -223,7 +223,7 @@
             <p
                 class="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-500"
             >
-                This outlet has closed for now. Its menu is still here to look
+                This restaurant has closed for now. Its menu is still here to look
                 at.
             </p>
         {/if}
@@ -232,7 +232,7 @@
             <p class="text-sm text-muted">Loading…</p>
         {:else if sections.length === 0}
             <p class="text-sm text-muted">
-                Nothing on the menu yet. It'll show up here as the outlet adds
+                Nothing on the menu yet. It'll show up here as the restaurant adds
                 to it.
             </p>
         {:else}
@@ -305,7 +305,7 @@
                                     </div>
 
                                     <!-- What the kitchen leaves out, and roughly
-                                         what it is worth - only what the outlet
+                                         what it is worth - only what the restaurant
                                          actually said. "Jain" is spelled out because
                                          the word on its own usually means no onion
                                          or garlic and no more. -->
@@ -400,7 +400,7 @@
                     <span class="text-xs text-muted">
                         {cartCount}
                         {cartCount === 1 ? "item" : "items"} from {outlet?.name ??
-                            "this outlet"}
+                            "this restaurant"}
                     </span>
 
                     <span class="text-sm font-medium tabular-nums"

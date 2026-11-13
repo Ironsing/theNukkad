@@ -2,16 +2,16 @@ import { supabase } from './supabase';
 import { currentUserId } from './auth';
 import { writeLogo } from './photos';
 import {
-    type Outlet,
-    type OutletRow,
+    type Restaurant,
+    type RestaurantRow,
     type RestaurantStatus,
-    outletColumns,
-    toOutlet,
-} from './outlets';
+    restaurantColumns,
+    toRestaurant,
+} from './restaurants';
 
 // What a restaurant may write, as a whole draft: on a settings form, a field
 // left out and a field cleared to null must not mean the same thing.
-export type OutletDraft = {
+export type RestaurantDraft = {
     name: string;
     phone: string;
     email: string;
@@ -21,25 +21,25 @@ export type OutletDraft = {
     status: RestaurantStatus;
 };
 
-// A restaurant's own outlet: read it, write it, and nothing else. Every method
+// A restaurant's own restaurant: read it, write it, and nothing else. Every method
 // here means "my row", because the id it works with is the account's own.
-export class MyOutlet {
-    // The caller's outlet, or null before it has saved anything.
-    async get(): Promise<Outlet | null> {
+export class MyRestaurant {
+    // The caller's restaurant, or null before it has saved anything.
+    async get(): Promise<Restaurant | null> {
         const id = await currentUserId();
 
         const { data, error } = await supabase
             .from('restaurant_info')
-            .select(outletColumns)
+            .select(restaurantColumns)
             .eq('id', id)
             .maybeSingle()
-            .returns<OutletRow>();
+            .returns<RestaurantRow>();
 
         if (error) {
             throw error;
         }
 
-        return data === null ? null : toOutlet(data);
+        return data === null ? null : toRestaurant(data);
     }
 
     // First save and every later edit are this one call: the row is keyed to the
@@ -49,7 +49,7 @@ export class MyOutlet {
     // Returns the stored row, not the draft: the caller renders what the database
     // actually holds, so a write that matched nothing throws instead of reporting
     // a save that never happened.
-    async save(draft: OutletDraft): Promise<Outlet> {
+    async save(draft: RestaurantDraft): Promise<Restaurant> {
         const id = await currentUserId();
 
         const { data, error } = await supabase
@@ -67,15 +67,15 @@ export class MyOutlet {
                 },
                 { onConflict: 'id' },
             )
-            .select(outletColumns)
+            .select(restaurantColumns)
             .single()
-            .returns<OutletRow>();
+            .returns<RestaurantRow>();
 
         if (error) {
             throw error;
         }
 
-        return toOutlet(data);
+        return toRestaurant(data);
     }
 
     async saveLogo(photo: Blob): Promise<string> {
@@ -83,4 +83,4 @@ export class MyOutlet {
     }
 }
 
-export const myOutlet = new MyOutlet();
+export const myRestaurant = new MyRestaurant();

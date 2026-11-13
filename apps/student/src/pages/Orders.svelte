@@ -108,7 +108,7 @@
             use:link
             class="inline-flex items-center gap-1.5 self-start text-sm text-muted transition hover:text-primary"
         >
-            <span aria-hidden="true">←</span> Outlets
+            <span aria-hidden="true">←</span> Restaurants
         </a>
 
         <header class="flex items-baseline justify-between">
@@ -121,7 +121,7 @@
             <p class="text-sm text-muted">Loading…</p>
         {:else if orders.length === 0}
             <p class="text-sm text-muted">
-                Nothing ordered yet. Pick an outlet and it'll show up here.
+                Nothing ordered yet. Pick a restaurant and it'll show up here.
             </p>
         {:else}
             <ul class="flex flex-col gap-3">

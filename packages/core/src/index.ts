@@ -1,14 +1,14 @@
 export * from './auth';
 export * from './auth_routing';
 export {
-    Outlets,
-    outlets,
+    Restaurants,
+    restaurants,
     fold,
-    type Outlet,
-    type OutletChange,
+    type Restaurant,
+    type RestaurantChange,
     type RestaurantStatus,
-} from './outlets';
-export { MyOutlet, myOutlet, type OutletDraft } from './my_outlet';
+} from './restaurants';
+export { MyRestaurant, myRestaurant, type RestaurantDraft } from './my_restaurant';
 export {
     MenuReader,
     diets,

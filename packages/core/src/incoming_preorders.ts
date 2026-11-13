@@ -9,25 +9,25 @@ import {
     type PreorderRow,
 } from './my_preorders';
 
-// An outlet's own preorders: read the requests addressed to it, watch for one
+// An restaurant's own preorders: read the requests addressed to it, watch for one
 // arriving or being answered, answer one, cook one, and read one's code back. Every
 // method here means "requests to me", because the policies are what decide it - the
-// select policy shows an outlet the requests addressed to it and nobody else's, so
-// nothing here names the outlet.
+// select policy shows an restaurant the requests addressed to it and nobody else's, so
+// nothing here names the restaurant.
 //
 // The state machine is the whole of what this class has that MyPreorders does not:
 // two answers and a cook, which are the three transitions there are.
 export class IncomingPreorders {
-    // This outlet's requests, soonest deadline first: the next one due is the next one
+    // This restaurant's requests, soonest deadline first: the next one due is the next one
     // to answer, and it is the order the (restaurant_id, deadline) index is in. Not
-    // newest first, the way an outlet reads its orders - an order is read by when it
+    // newest first, the way an restaurant reads its orders - an order is read by when it
     // arrived, a request by when it is wanted.
     //
-    // Everything addressed to this outlet comes back, requests already answered and
-    // refused included, exactly as an outlet's order list carries everything it has
+    // Everything addressed to this restaurant comes back, requests already answered and
+    // refused included, exactly as an restaurant's order list carries everything it has
     // cooked. A board splits them by status rather than asking the database for a
     // slice, which is also what lets it show what it has turned down without a second
-    // read. Nothing here names the outlet - the select policy shows it its own rows
+    // read. Nothing here names the restaurant - the select policy shows it its own rows
     // and no others.
     async list(): Promise<Preorder[]> {
         const { data, error } = await supabase
@@ -44,7 +44,7 @@ export class IncomingPreorders {
     }
 
     // One request's code, or null until it has been cooked. Null is also the answer
-    // for a request that is not this outlet's, and for one that does not exist: a row
+    // for a request that is not this restaurant's, and for one that does not exist: a row
     // the caller may not see is the same answer on purpose.
     async getOtpFor(preorderId: string): Promise<string | null> {
         return otpFor(preorderId);
@@ -55,8 +55,8 @@ export class IncomingPreorders {
     // and a page reads its list again, which the change it just made arrives over
     // anyway.
     //
-    // A student calling this is refused in words ("only an outlet can answer a
-    // preorder"), and so is a request that is not this outlet's, which reads as no such
+    // A student calling this is refused in words ("only an restaurant can answer a
+    // preorder"), and so is a request that is not this restaurant's, which reads as no such
     // request rather than as no permission. A request already answered - accepted,
     // refused, or cooked - answers "that preorder has already been answered", because
     // the first answer is the one the student was told and a second could only take it
@@ -118,9 +118,9 @@ export class IncomingPreorders {
     }
 
     // The code as it is said at the counter and typed in: the one request it belongs
-    // to, or null when it belongs to no request of this outlet's.
+    // to, or null when it belongs to no request of this restaurant's.
     //
-    // A code is unique to its outlet for a day within this table and not across the two
+    // A code is unique to its restaurant for a day within this table and not across the two
     // pools, so a code typed at a counter should be looked up through
     // findTicketByCode, which asks both - this answers about requests alone, and a page
     // that wants only that can call it directly.
@@ -151,14 +151,14 @@ export class IncomingPreorders {
         return data === null ? null : toPreorder(data);
     }
 
-    // Something happened to one of this outlet's requests: one arrived, one was
+    // Something happened to one of this restaurant's requests: one arrived, one was
     // answered, or one was cooked. It carries nothing, for the same reason the
     // student's side does not - a request's lines are a second table and not in the
     // Realtime publication, so a change describes a head and never what is on it. A
     // page reads its list again on each change, which is also what brings the code.
     //
     // No filter: the policy already narrows this channel to the requests addressed to
-    // this outlet. Returns the unsubscribe, which a page calls when it goes away, and
+    // this restaurant. Returns the unsubscribe, which a page calls when it goes away, and
     // reading the table on mount as well as subscribing covers the moment before the
     // channel is up.
     subscribe(onChange: () => void): () => void {

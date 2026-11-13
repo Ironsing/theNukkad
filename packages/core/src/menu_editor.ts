@@ -10,17 +10,17 @@ import {
     toMenuItem,
 } from './menu_reader';
 
-// What a restaurant may write, as a whole draft: an item the outlet is adding,
+// What a restaurant may write, as a whole draft: an item the restaurant is adding,
 // where every field is its own to choose.
 export type NewMenuItem = {
     name: string;
     price: number;
     category: string;
-    // Not optional, and there is no default to fall back on: the outlet says
+    // Not optional, and there is no default to fall back on: the restaurant says
     // what it is selling, because a forgotten one that landed on veg would be a
     // claim about someone's dinner.
     diet: Diet;
-    // Named rather than defaulted, for the same reason: an outlet saying nothing
+    // Named rather than defaulted, for the same reason: an restaurant saying nothing
     // about ghee or onion is saying neither is left out. Calories are the one
     // thing here that may be unsaid, because nobody may have weighed it.
     vegan: boolean;
@@ -44,7 +44,7 @@ export type MenuItemEdit = Partial<{
     available: boolean;
 }>;
 
-// The columns an outlet may write. The id and the owner are not among them: a
+// The columns an restaurant may write. The id and the owner are not among them: a
 // row's identity is not a field of a form.
 type WritableColumns = Pick<
     MenuItemRow,
@@ -156,7 +156,7 @@ export class MenuEditor {
 
     // Adding an item. The insert deliberately does not name an owner: the
     // column's default is the signed-in account and the policy checks it either
-    // way, so an item cannot be put on another outlet's menu by asking.
+    // way, so an item cannot be put on another restaurant's menu by asking.
     //
     // Returns the stored row rather than the draft: the caller renders what the
     // database holds.
@@ -261,13 +261,13 @@ export class MenuEditor {
         return await writeItemPhoto(await currentUserId(), id, photo);
     }
 
-    // An item that is not coming back - the supplier stopped, or the outlet
-    // doesn't sell it any more. Each of those is a row an outlet would otherwise
+    // An item that is not coming back - the supplier stopped, or the restaurant
+    // doesn't sell it any more. Each of those is a row an restaurant would otherwise
     // have to flag false forever, which is what leaves a menu nobody can read.
     //
     // A delete hands no row back, so this asks for the id the way `write` asks
     // for the row: a delete that matched nothing - a stale id, or an item on
-    // another outlet's menu, which the policies will not match - throws rather
+    // another restaurant's menu, which the policies will not match - throws rather
     // than reporting a removal that never happened.
     async remove(id: string): Promise<void> {
         const { data, error } = await supabase
@@ -287,7 +287,7 @@ export class MenuEditor {
     }
 
     // One update, one stored row back. A write that matched nothing - a stale
-    // id, or an item on another outlet's menu, which the policies will not match
+    // id, or an item on another restaurant's menu, which the policies will not match
     // - throws rather than reporting a save that never happened.
     private async write(
         id: string,

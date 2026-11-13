@@ -1,4 +1,4 @@
--- Local fixtures: one student, four outlets with menus.
+-- Local fixtures: one student, four restaurants with menus.
 -- Every account signs in with the password `password123`.
 
 do $$
@@ -13,7 +13,7 @@ begin
             ('momo@nukkad.test', 'restaurant'),
             ('chai@nukkad.test', 'restaurant'),
             ('student@nukkad.test', 'student')
-        ) as account(email, role)
+        ) as account(email, type)
     loop
         select id into account_id from auth.users where email = fixture.email;
 
@@ -77,9 +77,9 @@ begin
             );
         end if;
 
-        -- The account arrives with its profile, as the trigger makes it - a
-        -- student. Which app signs in is what says otherwise.
-        update public.profiles set role = fixture.role where id = account_id;
+        -- The account arrives with its account type row, as the trigger makes
+        -- it - a student. Which app signs in is what says otherwise.
+        update public.account_types set type = fixture.type where id = account_id;
     end loop;
 end $$;
 
@@ -88,13 +88,13 @@ insert into public.restaurant_info (
 )
 select
     account.id,
-    outlet.name,
-    outlet.phone,
-    outlet.email,
-    outlet.address,
-    outlet.opens_at::time,
-    outlet.closes_at::time,
-    outlet.status
+    restaurant.name,
+    restaurant.phone,
+    restaurant.email,
+    restaurant.address,
+    restaurant.opens_at::time,
+    restaurant.closes_at::time,
+    restaurant.status
 from (values
     (
         'chaat@nukkad.test', 'Chaat Chowk', '+91 98100 11001',
@@ -116,8 +116,8 @@ from (values
         'chaiadda@nukkad.example',
         'Library Block, Ground Floor', '06:00', '23:00', 'closedManually'
     )
-) as outlet(account_email, name, phone, email, address, opens_at, closes_at, status)
-join auth.users as account on account.email = outlet.account_email
+) as restaurant(account_email, name, phone, email, address, opens_at, closes_at, status)
+join auth.users as account on account.email = restaurant.account_email
 on conflict (id) do update set
     name = excluded.name,
     phone = excluded.phone,
@@ -131,7 +131,7 @@ insert into public.menu_items (
     restaurant_id, name, price, category, diet, vegan, jain, calories, available
 )
 select
-    outlet.id,
+    restaurant.id,
     item.name,
     item.price,
     item.category,
@@ -166,12 +166,12 @@ from (values
     ('Chai Adda', 'Bun Maska', 35.00, 'Snacks', 'veg', false, false, 280, true),
     ('Chai Adda', 'Vada Pav', 40.00, 'Snacks', 'veg', true, false, 350, true),
     ('Chai Adda', 'Egg Bhurji Pav', 60.00, 'Snacks', 'egg', false, false, 380, true)
-) as item(outlet_name, name, price, category, diet, vegan, jain, calories, available)
-join public.restaurant_info as outlet on outlet.name = item.outlet_name
--- Run against a database that already has these, this leaves an outlet's own
+) as item(restaurant_name, name, price, category, diet, vegan, jain, calories, available)
+join public.restaurant_info as restaurant on restaurant.name = item.restaurant_name
+-- Run against a database that already has these, this leaves an restaurant's own
 -- edits alone: by name, an item is the same item.
 where not exists (
     select 1
     from public.menu_items as existing
-    where existing.restaurant_id = outlet.id and existing.name = item.name
+    where existing.restaurant_id = restaurant.id and existing.name = item.name
 );

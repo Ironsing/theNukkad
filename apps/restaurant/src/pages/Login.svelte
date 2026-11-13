@@ -78,11 +78,11 @@
             <p
                 class="mt-4 inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-medium tracking-wide text-accent uppercase"
             >
-                Outlet app
+                Restaurant app
             </p>
 
             <p class="mt-3 text-sm tracking-wide text-muted">
-                Incoming orders and pickup codes for your outlet.
+                Incoming orders and pickup codes for your restaurant.
             </p>
         </div>
 

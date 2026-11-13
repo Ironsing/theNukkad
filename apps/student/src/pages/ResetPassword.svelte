@@ -50,7 +50,7 @@
             </p>
 
             <p class="mt-3 text-sm tracking-wide text-muted">
-                Advance orders for indie food outlets on campus.
+                Advance orders for indie restaurants on campus.
             </p>
         </div>
 

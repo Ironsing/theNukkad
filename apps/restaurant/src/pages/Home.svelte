@@ -1,6 +1,6 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
-    import { myOutlet, signOut, type RestaurantStatus } from "@thenukkad/core";
+    import { myRestaurant, signOut, type RestaurantStatus } from "@thenukkad/core";
     import MenuControls from "../components/MenuControls.svelte";
     import Photo from "../components/Photo.svelte";
 
@@ -28,7 +28,7 @@
     );
 
     let loading = $state(true);
-    let exists = $state(false); // has this outlet ever been saved?
+    let exists = $state(false); // has this restaurant ever been saved?
     let error = $state("");
     let saved = $state("");
 
@@ -65,7 +65,7 @@
     }
 
     $effect(() => {
-        myOutlet
+        myRestaurant
             .get()
             .then((outlet) => {
                 if (!outlet) return;
@@ -97,7 +97,7 @@
         }
 
         try {
-            const outlet = await myOutlet.save({
+            const outlet = await myRestaurant.save({
                 name: form.name,
                 phone: form.phone,
                 email: form.email,
@@ -130,7 +130,7 @@
         uploadingLogo = true;
 
         try {
-            logo = await myOutlet.saveLogo(file);
+            logo = await myRestaurant.saveLogo(file);
             logoVersion += 1;
         } catch (e) {
             logoError = message(e);
@@ -155,12 +155,12 @@
         <p
             class="inline-flex items-center self-start rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-medium tracking-wide text-accent uppercase"
         >
-            Outlet app
+            Restaurant app
         </p>
 
         <header class="flex items-baseline justify-between">
             <h1 class="text-2xl font-semibold tracking-[-0.03em]">
-                {tab === "outlet" ? "Your outlet" : "Your menu"}
+                {tab === "outlet" ? "Your restaurant" : "Your menu"}
             </h1>
 
             <button
@@ -204,7 +204,7 @@
                     ? 'bg-accent/10 text-accent'
                     : 'text-muted hover:text-primary'}"
             >
-                Outlet
+                Restaurant
             </button>
 
             <button
@@ -231,7 +231,7 @@
         {:else}
             <p class="text-sm text-muted">
                 {exists
-                    ? "Students can see this outlet."
+                    ? "Students can see this restaurant."
                     : "Not set up yet. Saving puts you on the student list."}
             </p>
 
@@ -241,7 +241,7 @@
                         <Photo
                             src={logo}
                             alt={form.name.trim() === ""
-                                ? "Your outlet"
+                                ? "Your restaurant"
                                 : form.name}
                             class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/10 object-cover text-lg font-medium text-accent"
                         />
@@ -312,7 +312,7 @@
                         class={field}
                         type="email"
                         maxlength="254"
-                        placeholder="outlet@example.com"
+                        placeholder="restaurant@example.com"
                         bind:value={form.email}
                     />
                 </div>

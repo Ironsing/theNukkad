@@ -3,7 +3,7 @@ import { menuItemPhotoUrl } from './photos';
 
 // The kinds of food a menu is read for, in this country's own three: veg,
 // nonveg, and egg, which is neither. Not free text the way a category is -
-// these are fixed by how the food is made - so the outlet picks one rather than
+// these are fixed by how the food is made - so the restaurant picks one rather than
 // typing one, and there is no fourth to add.
 export const diets = ['veg', 'nonveg', 'egg'] as const;
 
@@ -35,7 +35,7 @@ export const dietFlagLabels: Record<DietFlag, string> = {
     jain: 'Jain',
 };
 
-// What each flag promises, in the outlet's own words. "Jain" alone does not say
+// What each flag promises, in the restaurant's own words. "Jain" alone does not say
 // it - in restaurant practice the word usually means no onion or garlic and
 // nothing more - so a student has to be able to read the claim, not the label.
 export const dietFlagMeanings: Record<DietFlag, string> = {
@@ -59,7 +59,7 @@ export type MenuItem = {
     // the marker rather than instead of it.
     vegan: boolean;
     jain: boolean;
-    // Roughly what one is worth, in kcal, or null because the outlet has not
+    // Roughly what one is worth, in kcal, or null because the restaurant has not
     // said. Null is a claim of its own - "nobody weighed this" - and not a zero.
     calories: number | null;
     available: boolean;
@@ -173,7 +173,7 @@ function toChange(payload: ChangePayload): MenuItemChange | null {
 
     // A row missing the columns we show is not a row we can show. Calories are
     // absent only when the payload did not carry them: null is a value here,
-    // and the one an outlet that has not weighed the item sends.
+    // and the one an restaurant that has not weighed the item sends.
     if (
         id === undefined ||
         restaurant_id === undefined ||
@@ -222,14 +222,14 @@ export function foldMenuItems(
 
 export type MenuSection = {
     category: string;
-    // Everything the outlet filed under that name, in the order above.
+    // Everything the restaurant filed under that name, in the order above.
     items: MenuItem[];
 };
 
 // A menu as the page shows it: one block per category, the categories in name
-// order. Which categories exist is the outlet's own text and nothing enumerates
+// order. Which categories exist is the restaurant's own text and nothing enumerates
 // them, so there is nothing to look up here - two items fall in the same
-// section exactly when the outlet spelled the category the same way.
+// section exactly when the restaurant spelled the category the same way.
 //
 // The list is sorted here rather than trusted to arrive sorted, so that a page
 // whose list has only ever seen live changes reads the same as one that was
@@ -250,20 +250,20 @@ export function menuSections(items: MenuItem[]): MenuSection[] {
     return sections;
 }
 
-// What a student can do with one outlet's menu: read it, and watch it. RLS says
+// What a student can do with one restaurant's menu: read it, and watch it. RLS says
 // the same thing - a student account has no insert or update policy - but the
 // split is the point: the student app is never handed a way to change a menu.
 export class MenuReader {
-    // Which outlet's menu this is. It belongs to the object rather than to each
-    // call because a page shows one outlet's menu, and because the subscription
-    // below has to name the outlet in its filter.
+    // Which restaurant's menu this is. It belongs to the object rather than to each
+    // call because a page shows one restaurant's menu, and because the subscription
+    // below has to name the restaurant in its filter.
     private readonly restaurantId: string;
 
     constructor(restaurantId: string) {
         this.restaurantId = restaurantId;
     }
 
-    // That outlet's menu, by category and then by name: the order the page shows
+    // That restaurant's menu, by category and then by name: the order the page shows
     // it in, and the order folding keeps.
     async list(): Promise<MenuItem[]> {
         const { data, error } = await supabase
@@ -281,12 +281,12 @@ export class MenuReader {
         return data.map(toMenuItem);
     }
 
-    // Live changes to this outlet's menu, and only this outlet's: the filter is
-    // applied by the server, so an item put on another outlet's menu never
+    // Live changes to this restaurant's menu, and only this restaurant's: the filter is
+    // applied by the server, so an item put on another restaurant's menu never
     // arrives, and neither does a change to it. RLS decides who may be sent a
     // row, exactly as it decides for `list` - except for deletes, which the
     // policies cannot cover, because a row that is gone cannot be checked
-    // against them. An outlet is told the id of an item on a menu it may not
+    // against them. An restaurant is told the id of an item on a menu it may not
     // read. Nothing but the id travels, and an id the list never held folds
     // away to nothing, so where a delete came from does not matter.
     //
@@ -305,7 +305,7 @@ export class MenuReader {
     //
     // Returns the unsubscribe, which a page calls when it goes away, or the
     // channel goes on listening for a page nobody is looking at. The topic names
-    // the outlet because this client hands back a channel it already has when it
+    // the restaurant because this client hands back a channel it already has when it
     // is asked for the same topic again: two readers of two menus sharing one
     // topic would share one filter, and only one of them would be right. Changes
     // made in the moment after subscribing can be missed while the server is

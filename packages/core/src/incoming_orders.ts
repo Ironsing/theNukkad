@@ -8,14 +8,14 @@ import {
     type OrderRow,
 } from './my_orders';
 
-// An outlet's own orders: read the ones addressed to it, watch for new ones, cook
+// An restaurant's own orders: read the ones addressed to it, watch for new ones, cook
 // one, read a code back, and read one order's code on its own. Every method here
 // means "orders to me", because the policies are what decide it - the select
-// policy shows an outlet the orders addressed to it and nobody else's, so nothing
-// here names the outlet.
+// policy shows an restaurant the orders addressed to it and nobody else's, so nothing
+// here names the restaurant.
 export class IncomingOrders {
-    // This outlet's orders, newest first: the order the index is in, and the
-    // order an incoming list is read in. Nothing here names the outlet - the
+    // This restaurant's orders, newest first: the order the index is in, and the
+    // order an incoming list is read in. Nothing here names the restaurant - the
     // select policy shows it its own rows and no others.
     async list(): Promise<Order[]> {
         const { data, error } = await supabase
@@ -32,7 +32,7 @@ export class IncomingOrders {
     }
 
     // One order's code, or null until it has been cooked. Null is also the answer
-    // for an order that is not this outlet's, and for one that does not exist: a
+    // for an order that is not this restaurant's, and for one that does not exist: a
     // row the caller may not see is the same answer on purpose.
     async getOtpFor(orderId: string): Promise<string | null> {
         return otpFor(orderId);
@@ -48,8 +48,8 @@ export class IncomingOrders {
     // customer standing at the counter. getOtpFor is there for a page that holds
     // an order and no code at all.
     //
-    // A student calling this is refused in words ("only an outlet can mark an
-    // order ready"), and so is an order that is not this outlet's, which reads as
+    // A student calling this is refused in words ("only an restaurant can mark an
+    // order ready"), and so is an order that is not this restaurant's, which reads as
     // no such order rather than as no permission.
     async markReady(orderId: string): Promise<string> {
         const { data, error } = await supabase
@@ -73,12 +73,12 @@ export class IncomingOrders {
     // The code as it is said at the counter and typed in: the one order it
     // belongs to, or null when it belongs to none.
     //
-    // A code is unique to its outlet for a day, not for good - minting refuses a
-    // code this outlet has used in the last day, and nothing older is refused - so
+    // A code is unique to its restaurant for a day, not for good - minting refuses a
+    // code this restaurant has used in the last day, and nothing older is refused - so
     // an order from yesterday can hold today's digits. The newest match is the
     // live one and is what this answers with; a page shows the order's own times,
     // so the counter can see that a ticket is an old one rather than not being
-    // told at all. The index on (outlet, code) is what makes this a lookup.
+    // told at all. The index on (restaurant, code) is what makes this a lookup.
     //
     // Anything that could not be a code is answered without asking, since the
     // column's own check is four digits with no leading zero. A page that would
@@ -107,14 +107,14 @@ export class IncomingOrders {
         return data === null ? null : toOrder(data);
     }
 
-    // Something happened to one of this outlet's orders: one arrived, or one was
+    // Something happened to one of this restaurant's orders: one arrived, or one was
     // cooked. It carries nothing, for the same reason the student's side does not
     // - an order's lines are a second table and not in the Realtime publication,
     // so a change describes a head and never what is on it. A page reads its list
     // again on each change.
     //
     // No filter: the policy already narrows this channel to the orders addressed
-    // to this outlet, so there is nothing to add.
+    // to this restaurant, so there is nothing to add.
     //
     // Returns the unsubscribe, which a page calls when it goes away, or the
     // channel goes on listening for a page nobody is looking at. Changes made in

@@ -1,6 +1,6 @@
 ## About
 
-This is the frontend and mobile app source for @theNukkad, an app for placing advance orders at the various food outlets across Shiv Nadar University, Noida.
+This is the frontend and mobile app source for @theNukkad, an app for placing advance orders at the various restaurants across Shiv Nadar University, Noida.
 
 ## Technology
 Pure TypeScript, with Svelte for the frontend, Tailwind and Tailwind-Typography for styling, Vite, and Capacitor for building the native projects. We use Supabase for Auth, a database, and object storage.
@@ -20,7 +20,7 @@ The separation of concerns and distribution of human ownership over code is simp
 Almost all the *important* stuff-the application logic-lives in `supabase`.
 
 The two apps are near-identical. They share every token in `packages/core/src/theme.css`, but each picks its own
-`--color-accent` in its own `app.css` (green for students, orange for outlets).
+`--color-accent` in its own `app.css` (green for students, orange for restaurants).
 
 ## Running
 

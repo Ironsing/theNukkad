@@ -6,16 +6,16 @@
         foldMenuItems,
         menuSections,
         myPreorders,
-        outlets,
+        restaurants,
         rupees,
         type MenuItem,
-        type Outlet,
+        type Restaurant,
     } from "@thenukkad/core";
 
     // The router hands a page its URL parameters.
     let { params }: { params: { id: string } } = $props();
 
-    let outlet = $state<Outlet | null>(null);
+    let outlet = $state<Restaurant | null>(null);
     let items = $state<MenuItem[]>([]);
     let loading = $state(true);
     let error = $state("");
@@ -121,7 +121,7 @@
             // the only place its answer and its code will turn up.
             push("/preorders");
         } catch (e) {
-            // The refusals are sentences - that outlet has closed for now, that
+            // The refusals are sentences - that restaurant has closed for now, that
             // time has already passed, only one preorder a minute - so the bar
             // shows the one it is given.
             askError = message(e);
@@ -146,7 +146,7 @@
         askError = "";
         loading = true;
 
-        outlets
+        restaurants
             .get(id)
             .then((found) => {
                 if (live) outlet = found;
@@ -185,7 +185,7 @@
             use:link
             class="inline-flex items-center gap-1.5 self-start text-sm text-muted transition hover:text-primary"
         >
-            <span aria-hidden="true">←</span> Outlets
+            <span aria-hidden="true">←</span> Restaurants
         </a>
 
         <header class="flex flex-col gap-1">
@@ -195,7 +195,7 @@
 
             <p class="text-xs text-muted">
                 Order it now, collect it later. Pick a time up to a day ahead and
-                the outlet will say yes or no.
+                the restaurant will say yes or no.
             </p>
         </header>
 
@@ -203,7 +203,7 @@
             <p
                 class="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-500"
             >
-                This outlet has closed for now, so a preorder would be refused.
+                This restaurant has closed for now, so a preorder would be refused.
             </p>
         {/if}
 
@@ -312,7 +312,7 @@
                 <span class="text-xs text-muted">
                     {cartCount}
                     {cartCount === 1 ? "item" : "items"} from {outlet?.name ??
-                        "this outlet"}
+                        "this restaurant"}
                 </span>
 
                 <span class="text-sm font-medium tabular-nums"

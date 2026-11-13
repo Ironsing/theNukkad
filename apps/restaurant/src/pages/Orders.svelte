@@ -39,7 +39,7 @@
     }
 
     // 'Today, 2:38 PM', and '21 Oct, 9:04 AM' for anything older - which a
-    // ticket can be: a code is only unique to this outlet for a day, so an order
+    // ticket can be: a code is only unique to this restaurant for a day, so an order
     // from yesterday can hold today's digits. Saying when it was placed is what
     // lets the counter see that for itself.
     function placedAt(stamp: string) {
@@ -99,7 +99,7 @@
 
     // The code as it is said across the counter. Anything that could not be one
     // is answered here rather than with a round trip - four digits, no leading
-    // zero - and the rest is this outlet's own orders, because that is all the
+    // zero - and the rest is this restaurant's own orders, because that is all the
     // policy shows it.
     async function checkCode(event: SubmitEvent) {
         event.preventDefault();
@@ -118,7 +118,7 @@
 
         try {
             // Both pools at once, through findTicketByCode: a code is unique to
-            // this outlet for a day within its own table and not across the two,
+            // this restaurant for a day within its own table and not across the two,
             // so asking about orders alone would find nothing while a student
             // stood there holding a preorder's code.
             const ticket = await findTicketByCode(code);
@@ -156,7 +156,7 @@
             use:link
             class="inline-flex items-center gap-1.5 self-start text-sm text-muted transition hover:text-primary"
         >
-            <span aria-hidden="true">←</span> Your outlet
+            <span aria-hidden="true">←</span> Your restaurant
         </a>
 
         <header class="flex items-baseline justify-between">

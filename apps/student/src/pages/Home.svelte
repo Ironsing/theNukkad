@@ -1,9 +1,9 @@
 <script lang="ts">
     import { link } from "svelte-spa-router";
-    import { fold, outlets, signOut, type Outlet } from "@thenukkad/core";
+    import { fold, restaurants, signOut, type Restaurant } from "@thenukkad/core";
     import Photo from "../components/Photo.svelte";
 
-    let rows = $state<Outlet[]>([]);
+    let rows = $state<Restaurant[]>([]);
     let loading = $state(true);
     let error = $state("");
 
@@ -24,13 +24,13 @@
     }
 
     $effect(() => {
-        outlets
+        restaurants
             .list()
             .then((loaded) => (rows = loaded))
             .catch((e) => (error = message(e)))
             .finally(() => (loading = false));
 
-        return outlets.subscribe((change) => (rows = fold(rows, change)));
+        return restaurants.subscribe((change) => (rows = fold(rows, change)));
     });
 </script>
 
@@ -43,7 +43,7 @@
         </p>
 
         <header class="flex items-baseline justify-between">
-            <h1 class="text-2xl font-semibold tracking-[-0.03em]">Outlets</h1>
+            <h1 class="text-2xl font-semibold tracking-[-0.03em]">Restaurants</h1>
 
             <button
                 type="button"
@@ -76,7 +76,7 @@
             <p class="text-sm text-muted">Loading…</p>
         {:else if rows.length === 0}
             <p class="text-sm text-muted">
-                No outlets yet. They'll show up here as they set themselves up.
+                No restaurants yet. They'll show up here as they set themselves up.
             </p>
         {:else}
             <ul class="flex flex-col gap-3">

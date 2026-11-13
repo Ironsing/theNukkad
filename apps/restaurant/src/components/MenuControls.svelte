@@ -283,7 +283,7 @@
 
 {#if !outletExists}
     <p class="text-sm text-muted">
-        You can't create a menu till you save outlet details.
+        You can't create a menu till you save restaurant details.
     </p>
 {:else if loading}
     <p class="text-sm text-muted">Loading…</p>

@@ -132,7 +132,7 @@
     }
 
     // Check a code through findTicketByCode, which asks both pools: a code is
-    // unique to this outlet for a day within its own table and not across the
+    // unique to this restaurant for a day within its own table and not across the
     // two, so a counter that asked one table would find nothing while someone
     // stood there holding the other. Whichever it is, the page says so.
     async function checkCode(event: SubmitEvent) {
@@ -186,7 +186,7 @@
             use:link
             class="inline-flex items-center gap-1.5 self-start text-sm text-muted transition hover:text-primary"
         >
-            <span aria-hidden="true">←</span> Your outlet
+            <span aria-hidden="true">←</span> Your restaurant
         </a>
 
         <header class="flex items-baseline justify-between">

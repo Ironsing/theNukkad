@@ -6,7 +6,7 @@ import { supabase } from './supabase';
 // that has already been placed.
 export type OrderLine = {
     id: string;
-    // Null once the outlet has taken the item off its menu. The line stays
+    // Null once the restaurant has taken the item off its menu. The line stays
     // readable either way, because the name and the price were copied with it:
     // an order outlives the menu it was placed from.
     menuItemId: string | null;
@@ -20,13 +20,13 @@ export type OrderLine = {
 export type Order = {
     id: string;
     restaurantId: string;
-    // The outlet's name, read with the order rather than looked up afterwards: a
-    // student's list spans outlets, and an id is not something a list can show.
+    // The restaurant's name, read with the order rather than looked up afterwards: a
+    // student's list spans restaurants, and an id is not something a list can show.
     restaurantName: string;
     // What the student wanted said - no onions, less spicy. Free text, and empty
     // is the ordinary case rather than a missing value.
     notes: string;
-    // When the outlet cooked it, and the code it minted then - both or neither,
+    // When the restaurant cooked it, and the code it minted then - both or neither,
     // because the table refuses one without the other. That is what makes `otp`
     // on its own the whole of "this is ready".
     readyAt: string | null;
@@ -34,7 +34,7 @@ export type Order = {
     // and nothing adds one up.
     otp: string | null;
     // Newest first is the order every read of this table is in - a student's
-    // history and an outlet's incoming list alike - and the order the index is
+    // history and an restaurant's incoming list alike - and the order the index is
     // in as well.
     createdAt: string;
     // At least one, always: an order without lines is not a state the database
@@ -63,7 +63,7 @@ export type OrderRow = {
     otp: string | null;
     created_at: string;
     // An object rather than a list: the foreign key points this way, so there is
-    // one outlet at most. The lines are a list because theirs points the other
+    // one restaurant at most. The lines are a list because theirs points the other
     // way.
     restaurant_info?: { name: string } | null;
     order_items?: OrderLineRow[] | null;
@@ -88,7 +88,7 @@ export function toOrder(row: OrderRow): Order {
     return {
         id: row.id,
         restaurantId: row.restaurant_id,
-        // An order cannot outlive its outlet - the foreign key cascades - so a
+        // An order cannot outlive its restaurant - the foreign key cascades - so a
         // read without the name is a shape we do not expect rather than a state
         // we plan for.
         restaurantName: row.restaurant_info?.name ?? '',
@@ -179,7 +179,7 @@ function toWireLines(lines: NewOrderLine[]): WireLine[] {
 // that can lie about it - the menu supplies both.
 export type NewOrderLine = { menuItemId: string; quantity: number };
 
-// What a student sends to place an order: the outlet, anything they want to say,
+// What a student sends to place an order: the restaurant, anything they want to say,
 // and what they want.
 export type NewOrder = {
     restaurantId: string;
@@ -189,8 +189,8 @@ export type NewOrder = {
 
 // One order's code, or null. Shared by both doors, because it is one column of
 // one row and whose rows it may be read from is the policies' business rather
-// than this function's: a student asking for an outlet's order gets exactly what
-// an outlet asking for another outlet's does, which is nothing.
+// than this function's: a student asking for an restaurant's order gets exactly what
+// an restaurant asking for another restaurant's does, which is nothing.
 //
 // Null is also the answer while an order is still in the kitchen, and there is no
 // third answer to tell those apart: a page that needs to know the order is there
@@ -220,7 +220,7 @@ export class MyOrders {
     // without its lines is not a state this can leave behind whichever part of
     // the request fails.
     //
-    // Every refusal arrives as a sentence - that outlet has closed for now, one
+    // Every refusal arrives as a sentence - that restaurant has closed for now, one
     // of those items is sold out, only one order a minute - so nothing is
     // translated here and a page shows the message it is given. What is checked
     // below is what the database would otherwise answer with a constraint's name
@@ -274,12 +274,12 @@ export class MyOrders {
     // One order's code, or null while the kitchen still has it. Null is also the
     // answer for an order that is not this student's and for one that does not
     // exist: a row the caller may not see is the same answer on purpose, the way
-    // Outlets.get answers it.
+    // Restaurants.get answers it.
     async getOtpFor(orderId: string): Promise<string | null> {
         return otpFor(orderId);
     }
 
-    // Something happened to one of this student's orders - most of all, an outlet
+    // Something happened to one of this student's orders - most of all, an restaurant
     // marking one ready, which is the whole of being notified: the code is minted
     // in the same update that sets ready_at, so it arrives with it.
     //
@@ -290,7 +290,7 @@ export class MyOrders {
     // instead - one small read, on a table a student writes at most once a
     // minute.
     //
-    // No filter, either: unlike a menu, where a student may read every outlet's
+    // No filter, either: unlike a menu, where a student may read every restaurant's
     // and so has to name the one being looked at, the policy here already narrows
     // this channel to their own orders, and there is nothing left to add.
     //

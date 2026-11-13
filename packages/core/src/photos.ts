@@ -2,14 +2,14 @@ import { supabase } from './supabase';
 
 const bucket = 'restaurants';
 
-// Given an outlet, get the path of its logo.
-function logoPath(outletId: string): string {
-    return `${outletId}/logo.jpg`;
+// Given an restaurant, get the path of its logo.
+function logoPath(restaurantId: string): string {
+    return `${restaurantId}/logo.jpg`;
 }
 
-// Given an outlet and one of its menu items, get the path of its photo.
-function menuItemPhotoPath(outletId: string, itemId: string): string {
-    return `${outletId}/menu/${itemId}/image.jpg`;
+// Given an restaurant and one of its menu items, get the path of its photo.
+function menuItemPhotoPath(restaurantId: string, itemId: string): string {
+    return `${restaurantId}/menu/${itemId}/image.jpg`;
 }
 
 // Given just a storage path, get the full, actual URL.
@@ -18,12 +18,12 @@ function publicUrl(path: string): string {
 }
 
 // Anything that needs to know whether there is a picture there has to find out for itself.
-export function logoUrl(outletId: string): string {
-    return publicUrl(logoPath(outletId));
+export function logoUrl(restaurantId: string): string {
+    return publicUrl(logoPath(restaurantId));
 }
 
-export function menuItemPhotoUrl(outletId: string, itemId: string): string {
-    return publicUrl(menuItemPhotoPath(outletId, itemId));
+export function menuItemPhotoUrl(restaurantId: string, itemId: string): string {
+    return publicUrl(menuItemPhotoPath(restaurantId, itemId));
 }
 
 // A dish photo fills a card and a logo is drawn at heading size.
@@ -90,21 +90,21 @@ async function uploadPhoto(path: string, jpeg: Blob): Promise<void> {
     }
 }
 
-export async function writeLogo(outletId: string, photo: Blob): Promise<string> {
-    await uploadPhoto(logoPath(outletId), await toJpeg(photo, logoEdge));
+export async function writeLogo(restaurantId: string, photo: Blob): Promise<string> {
+    await uploadPhoto(logoPath(restaurantId), await toJpeg(photo, logoEdge));
 
-    return logoUrl(outletId);
+    return logoUrl(restaurantId);
 }
 
 export async function writeItemPhoto(
-    outletId: string,
+    restaurantId: string,
     itemId: string,
     photo: Blob,
 ): Promise<string> {
     await uploadPhoto(
-        menuItemPhotoPath(outletId, itemId),
+        menuItemPhotoPath(restaurantId, itemId),
         await toJpeg(photo, photoEdge),
     );
 
-    return menuItemPhotoUrl(outletId, itemId);
+    return menuItemPhotoUrl(restaurantId, itemId);
 }

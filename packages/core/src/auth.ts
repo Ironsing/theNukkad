@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export type Role = 'student' | 'restaurant';
+export type AccountType = 'student' | 'restaurant';
 export type EmailCodeType = 'signup' | 'recovery';
 
 // How the confirmation and recovery emails are consumed. The web apps follow
@@ -22,9 +22,9 @@ export function usesEmailLinks() {
 
 // Set while a role-gated sign-in is in flight. SIGNED_IN fires as soon as the
 // password is accepted, but the account type is only knowable after that (the
-// profile row needs the session to be readable), and a mismatch signs the user
-// straight back out - so whoever watches for session changes must not move them
-// on in the meantime. See auth_routing.ts.
+// account_types row needs the session to be readable), and a mismatch signs the
+// user straight back out - so whoever watches for session changes must not move
+// them on in the meantime. See auth_routing.ts.
 let signInInFlight = false;
 
 export function isSignInInFlight() {
@@ -108,17 +108,17 @@ export async function currentUserId(): Promise<string> {
 
 // The account type of the logged-in user. Read from our own table rather than
 // trusted from anywhere client-side: RLS only lets a user select their own row.
-export async function currentRole(): Promise<Role> {
+export async function currentAccountType(): Promise<AccountType> {
     const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
+        .from('account_types')
+        .select('type')
         .single();
 
     if (error) {
         throw error;
     }
 
-    return data.role as Role;
+    return data.type as AccountType;
 }
 
 // Signs in, then refuses to keep the session unless the account's role is the
@@ -130,20 +130,20 @@ export async function currentRole(): Promise<Role> {
 export async function signIn(
     email: string,
     password: string,
-    role: Role,
+    accountType: AccountType,
 ) {
     signInInFlight = true;
 
     try {
         await signInWithPassword(email, password);
 
-        const actual = await currentRole();
+        const actual = await currentAccountType();
 
-        if (actual !== role) {
+        if (actual !== accountType) {
             await signOut();
 
             throw new Error(
-                role === 'restaurant'
+                accountType === 'restaurant'
                     ? 'That account is not a restaurant account.'
                     : 'That account is not a student account.',
             );

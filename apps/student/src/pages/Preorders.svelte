@@ -99,7 +99,7 @@
             use:link
             class="inline-flex items-center gap-1.5 self-start text-sm text-muted transition hover:text-primary"
         >
-            <span aria-hidden="true">←</span> Outlets
+            <span aria-hidden="true">←</span> Restaurants
         </a>
 
         <header class="flex items-baseline justify-between">
@@ -118,7 +118,7 @@
             <p class="text-sm text-muted">Loading…</p>
         {:else if preorders.length === 0}
             <p class="text-sm text-muted">
-                Nothing asked for yet. Pick an outlet and ask for something for
+                Nothing asked for yet. Pick a restaurant and ask for something for
                 later.
             </p>
         {:else}

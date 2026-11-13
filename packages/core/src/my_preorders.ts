@@ -23,7 +23,7 @@ export function refused(error: { message: string }): Error {
 }
 
 // The four states a request moves through, in the database's own words, because
-// they are the column's: unknown, until an outlet answers; accepted, after which
+// they are the column's: unknown, until an restaurant answers; accepted, after which
 // it can be cooked; rejected, which is the end of it; and ready, which holds the
 // code. Written once here the way the three diets are, so a page branches on the
 // same four words the table checks.
@@ -37,7 +37,7 @@ export const preorderStatuses = [
 export type PreorderStatus = (typeof preorderStatuses)[number];
 
 // The four as a page says them. Deliberately flat and neutral - "Accepted" says
-// the same thing to the student who asked and the outlet that answered - so each
+// the same thing to the student who asked and the restaurant that answered - so each
 // app can wrap its own sentence around them rather than reading a label written
 // for the other side.
 export const preorderStatusLabels: Record<PreorderStatus, string> = {
@@ -65,8 +65,8 @@ export type PreorderLineRow = OrderLineRow;
 export type Preorder = {
     id: string;
     restaurantId: string;
-    // The outlet's name, read with the request rather than looked up afterwards: a
-    // student's list spans outlets, and an id is not something a list can show.
+    // The restaurant's name, read with the request rather than looked up afterwards: a
+    // student's list spans restaurants, and an id is not something a list can show.
     restaurantName: string;
     // What the student wanted said. Free text, and empty is the ordinary case
     // rather than a missing value.
@@ -78,14 +78,14 @@ export type Preorder = {
     // Where it has got to. The four states are the whole of what a page branches
     // on, and the two moments beside it say when.
     status: PreorderStatus;
-    // When the outlet cooked it, and the code it minted then - both or neither,
+    // When the restaurant cooked it, and the code it minted then - both or neither,
     // because the table refuses one without the other.
     readyAt: string | null;
     // Four digits, as text: it is spoken aloud and typed without a leading zero,
     // and nothing adds one up.
     otp: string | null;
     // Newest first is the order a student's list is in; soonest deadline first is
-    // the order an outlet's board is in. The row carries both, and each side sorts
+    // the order an restaurant's board is in. The row carries both, and each side sorts
     // by its own.
     createdAt: string;
     // At least one, always: a request without lines is not a state the database
@@ -108,12 +108,12 @@ export type PreorderRow = {
     otp: string | null;
     created_at: string;
     // An object rather than a list: the foreign key points this way, so there is
-    // one outlet at most. The lines are a list because theirs points the other way.
+    // one restaurant at most. The lines are a list because theirs points the other way.
     restaurant_info?: { name: string } | null;
     preorder_items?: PreorderLineRow[] | null;
 };
 
-// Read by both preorder classes: a student's own requests and an outlet's incoming
+// Read by both preorder classes: a student's own requests and an restaurant's incoming
 // board alike. The embedded table's name is what the API joins by, which is why it
 // reads preorder_items here and order_items in my_orders.
 export const preorderColumns =
@@ -131,7 +131,7 @@ export function toPreorder(row: PreorderRow): Preorder {
     return {
         id: row.id,
         restaurantId: row.restaurant_id,
-        // A request cannot outlive its outlet - the foreign key cascades - so a read
+        // A request cannot outlive its restaurant - the foreign key cascades - so a read
         // without the name is a shape we do not expect rather than a state we plan
         // for.
         restaurantName: row.restaurant_info?.name ?? '',
@@ -250,7 +250,7 @@ function toWireLines(lines: NewPreorderLine[]): WireLine[] {
 // can lie about it - the menu supplies both.
 export type NewPreorderLine = { menuItemId: string; quantity: number };
 
-// What a student sends to ask for something later: the outlet, anything they want to
+// What a student sends to ask for something later: the restaurant, anything they want to
 // say, when they want it, and what they want.
 export type NewPreorder = {
     restaurantId: string;
@@ -264,8 +264,8 @@ export type NewPreorder = {
 
 // One request's code, or null. Shared by both doors, because it is one column of one
 // row and whose rows it may be read from is the policies' business rather than this
-// function's: a student asking for an outlet's request gets exactly what an outlet
-// asking for another outlet's does, which is nothing.
+// function's: a student asking for an restaurant's request gets exactly what an restaurant
+// asking for another restaurant's does, which is nothing.
 //
 // Null is also the answer while a request is waiting or accepted, and there is no
 // third answer to tell those apart: a page that needs to know reads the request,
@@ -289,14 +289,14 @@ export async function otpFor(preorderId: string): Promise<string | null> {
 // code, and watch for it changing. RLS says the same thing and more - a student has
 // no insert and no update on the table at all - so there is no method here for
 // answering a request, taking one back, or moving it along: the whole state machine
-// belongs to the outlet, and what a student holds is a request they can read and
+// belongs to the restaurant, and what a student holds is a request they can read and
 // watch.
 export class MyPreorders {
     // Places a request in one transaction on the database's side, so a request
     // without its lines is not a state this can leave behind whichever part of the
     // request fails.
     //
-    // Every refusal arrives as a sentence - that outlet has closed for now, only one
+    // Every refusal arrives as a sentence - that restaurant has closed for now, only one
     // preorder a minute, that time has already passed - so nothing is translated here
     // and a page shows the message it is given. What is checked below is what the
     // database would otherwise answer with a constraint's name or a cast error: an
@@ -354,12 +354,12 @@ export class MyPreorders {
     // One request's code, or null while there is nothing to collect. Null is also the
     // answer for a request that is not this student's and for one that does not
     // exist: a row the caller may not see is the same answer on purpose, the way
-    // Outlets.get answers it.
+    // Restaurants.get answers it.
     async getOtpFor(preorderId: string): Promise<string | null> {
         return otpFor(preorderId);
     }
 
-    // Something happened to one of this student's requests - most of all, an outlet
+    // Something happened to one of this student's requests - most of all, an restaurant
     // taking one on, which is the whole of being told, or marking one ready, which
     // brings the code with it.
     //
@@ -367,7 +367,7 @@ export class MyPreorders {
     // table is not in the Realtime publication, so a change here describes a request's
     // head and never its lines. A page reads its list again on each change instead.
     //
-    // No filter, either: unlike a menu, where a student may read every outlet's and so
+    // No filter, either: unlike a menu, where a student may read every restaurant's and so
     // has to name the one being looked at, the policy here already narrows this channel
     // to their own requests, and there is nothing left to add.
     //
