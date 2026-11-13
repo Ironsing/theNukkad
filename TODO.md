@@ -1,13 +1,14 @@
 ## Necessary
 
-- overhaul the ui, integrate the branding shubham makes. palette: black orange yellow green
-- dark mode
-- web app version and domain
+- overhaul the ui
+- payments
 
 ## Lastly
 
-- a whole lot of testing with builds on actual phones
+- a domain, android native app, pwa for ios
 - notifications
+- lots of testing
+- deploying
 
 ## Later
 
