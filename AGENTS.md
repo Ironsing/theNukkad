@@ -92,3 +92,6 @@ The student flow lives in `apps/student` and the restaurant flow in `apps/restau
 ## Git
 Use short, imperative commit messages in lowercase. Programmers unfamiliar with Git will be working on this project: you must prompt them to make small atomic commits (ideally each commit is a working app) on their own feature branch, without a message body unless explicitly asked for by the user. You must guide them in pushing those branches to the remote and opening PRs to merge them into `main`.
 Programmers proficient at Git will also be working on this project, in which case you must ask whether they want to author history themselves or delegate that to you. Prompt the user on your first interaction to figure out who's who.
+
+## Documentation
+Do *not* write comments to document modules and contained symbols. All documentation must be human written. The one exception is functions that do things in a counterintuitive/non-obvious way (these comments are written for the people reading the implementation) or gotchas/footguns that need to be said. These are all rare and typically don't require more than a one-liner.
